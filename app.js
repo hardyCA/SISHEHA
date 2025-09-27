@@ -792,6 +792,26 @@ class RestaurantManager {
       modal.classList.remove("block");
       // Restore body scroll
       document.body.style.overflow = "auto";
+
+      // Clean up dish modal state
+      if (modalId === "dish-modal") {
+        const form = document.getElementById("dish-form");
+        if (form) {
+          form.reset();
+          delete form.dataset.dishId;
+          const ingredientsContainer =
+            document.getElementById("dish-ingredients");
+          if (ingredientsContainer) {
+            ingredientsContainer.innerHTML = `
+              <div class="text-center py-6 text-gray-500">
+                <i class="fas fa-utensils text-2xl mb-2"></i>
+                <p class="text-sm">No hay ingredientes agregados</p>
+                <p class="text-xs">Selecciona ingredientes para comenzar</p>
+              </div>
+            `;
+          }
+        }
+      }
     }
   }
 
@@ -1084,53 +1104,52 @@ class RestaurantManager {
       return;
     }
 
-    container.innerHTML = ingredients
-      .map(
-        (ing, index) => `
-            <div class="bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
-                <div class="flex items-center gap-3">
-                    <div class="flex-1">
-                        <select name="ingredient-${index}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none text-sm" required>
-                            <option value="">Seleccionar ingrediente</option>
-                            ${this.ingredients
-                              .map(
-                                (ingredient) => `
-                                <option value="${ingredient.id}" data-cost="${
-                                  ingredient.costPerPortion ||
-                                  ingredient.price / ingredient.portions
-                                }" ${
-                                  ingredient.id === ing.ingredientId
-                                    ? "selected"
-                                    : ""
-                                }>
-                                    ${ingredient.name} (Bs. ${(
-                                  ingredient.costPerPortion ||
-                                  ingredient.price / ingredient.portions
-                                ).toFixed(2)}/porción)
-                                </option>
-                            `
-                              )
-                              .join("")}
-                        </select>
-                    </div>
-                    <div class="w-20">
-                        <input type="number" name="portions-${index}" placeholder="Cant." value="${
-          ing.portions || ing.quantity || 0
-        }" step="0.1" min="0" class="w-full px-2 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none text-sm text-center" required>
-                    </div>
-                    <button type="button" class="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors text-sm" onclick="this.closest('.bg-white').remove(); this.calculateDishCost();">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-        `
-      )
-      .join("");
+    // Clear container first
+    container.innerHTML = "";
 
-    // Add event listeners to recalculate cost
-    container.querySelectorAll("div").forEach((item) => {
-      const select = item.querySelector("select");
-      const input = item.querySelector("input");
+    // Add each ingredient as a separate element
+    ingredients.forEach((ing, index) => {
+      const ingredientItem = document.createElement("div");
+      ingredientItem.className =
+        "bg-white rounded-lg border border-gray-200 p-3 shadow-sm";
+      ingredientItem.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="flex-1">
+            <select name="ingredient-${index}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none text-sm" required>
+              <option value="">Seleccionar ingrediente</option>
+              ${this.ingredients
+                .map(
+                  (ingredient) => `
+                  <option value="${ingredient.id}" data-cost="${
+                    ingredient.costPerPortion ||
+                    ingredient.price / ingredient.portions
+                  }" ${ingredient.id === ing.ingredientId ? "selected" : ""}>
+                    ${ingredient.name} (Bs. ${(
+                    ingredient.costPerPortion ||
+                    ingredient.price / ingredient.portions
+                  ).toFixed(2)}/porción)
+                  </option>
+                `
+                )
+                .join("")}
+            </select>
+          </div>
+          <div class="w-20">
+            <input type="number" name="portions-${index}" placeholder="Cant." value="${
+        ing.portions || ing.quantity || 0
+      }" step="0.1" min="0" class="w-full px-2 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none text-sm text-center" required>
+          </div>
+          <button type="button" class="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors text-sm" onclick="this.closest('.bg-white').remove(); restaurantManager.calculateDishCost();">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      `;
+
+      container.appendChild(ingredientItem);
+
+      // Add event listeners to recalculate cost
+      const select = ingredientItem.querySelector("select");
+      const input = ingredientItem.querySelector("input");
 
       if (select && input) {
         const recalculate = () => this.calculateDishCost();
@@ -1138,13 +1157,19 @@ class RestaurantManager {
         input.addEventListener("input", recalculate);
       }
     });
+
+    // Calculate initial cost
+    setTimeout(() => {
+      this.calculateDishCost();
+    }, 100);
   }
 
   addIngredientToDish() {
     const container = document.getElementById("dish-ingredients");
     if (!container) return;
 
-    const index = container.querySelectorAll(".bg-white").length;
+    // Generate unique index based on timestamp to avoid conflicts
+    const index = Date.now();
     const ingredientItem = document.createElement("div");
     ingredientItem.className =
       "bg-white rounded-lg border border-gray-200 p-3 shadow-sm";
@@ -1171,7 +1196,7 @@ class RestaurantManager {
                 <div class="w-20">
                     <input type="number" name="portions-${index}" placeholder="Cant." step="0.1" min="0" class="w-full px-2 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none text-sm text-center" required>
                 </div>
-                <button type="button" class="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors text-sm" onclick="this.closest('.bg-white').remove(); this.calculateDishCost();">
+                <button type="button" class="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors text-sm" onclick="this.closest('.bg-white').remove(); restaurantManager.calculateDishCost();">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -1233,25 +1258,30 @@ class RestaurantManager {
     const ingredientItems = document.querySelectorAll(
       "#dish-ingredients > div"
     );
-    ingredientItems.forEach((item, index) => {
-      const ingredientSelect = item.querySelector(
-        `select[name="ingredient-${index}"]`
-      );
-      const portionsInput = item.querySelector(
-        `input[name="portions-${index}"]`
-      );
+    ingredientItems.forEach((item) => {
+      // Find the select and input elements within this item
+      const ingredientSelect = item.querySelector("select");
+      const portionsInput = item.querySelector("input[type='number']");
 
-      if (ingredientSelect.value && portionsInput.value) {
+      if (
+        ingredientSelect &&
+        portionsInput &&
+        ingredientSelect.value &&
+        portionsInput.value
+      ) {
         const ingredient = this.ingredients.find(
           (ing) => ing.id === ingredientSelect.value
         );
-        ingredients.push({
-          ingredientId: ingredientSelect.value,
-          name: ingredient.name,
-          portions: parseFloat(portionsInput.value),
-          costPerPortion:
-            ingredient.costPerPortion || ingredient.price / ingredient.portions,
-        });
+        if (ingredient) {
+          ingredients.push({
+            ingredientId: ingredientSelect.value,
+            name: ingredient.name,
+            portions: parseFloat(portionsInput.value),
+            costPerPortion:
+              ingredient.costPerPortion ||
+              ingredient.price / ingredient.portions,
+          });
+        }
       }
     });
 
