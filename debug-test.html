@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Test - Sistema Restaurante</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4">Debug Test - Sistema Restaurante</h1>
+        
+        <div class="space-y-4">
+            <div class="p-4 bg-blue-50 rounded-lg">
+                <h3 class="font-semibold mb-2">Test 1: Verificar Console Logs</h3>
+                <p class="text-sm text-gray-600">Abre las herramientas de desarrollador (F12) y ve a la pestaña Console</p>
+                <button id="test-console" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Test Console Log
+                </button>
+            </div>
+            
+            <div class="p-4 bg-green-50 rounded-lg">
+                <h3 class="font-semibold mb-2">Test 2: Verificar Firebase</h3>
+                <p class="text-sm text-gray-600">Verifica si Firebase está funcionando</p>
+                <button id="test-firebase" class="mt-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Test Firebase
+                </button>
+            </div>
+            
+            <div class="p-4 bg-yellow-50 rounded-lg">
+                <h3 class="font-semibold mb-2">Test 3: Simular Guardar Ingrediente</h3>
+                <p class="text-sm text-gray-600">Simula el proceso de guardar un ingrediente</p>
+                <button id="test-save" class="mt-2 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                    Test Save Ingredient
+                </button>
+            </div>
+        </div>
+        
+        <div id="results" class="mt-6">
+            <h3 class="font-semibold mb-2">Resultados:</h3>
+            <div id="results-content" class="text-sm text-gray-600"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAp8LOa6N8abYxQZpqpYqSKUzKNIGePF-s",
+            authDomain: "he-ha-4a4d0.firebaseapp.com",
+            databaseURL: "https://he-ha-4a4d0.firebaseio.com",
+            projectId: "he-ha-4a4d0",
+            storageBucket: "he-ha-4a4d0.firebasestorage.app",
+            messagingSenderId: "728567998765",
+            appId: "1:728567998765:web:1a96da025b65cc8469cba4"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Test 1: Console Log
+        document.getElementById('test-console').addEventListener('click', () => {
+            console.log("✅ Console log test successful");
+            document.getElementById('results-content').innerHTML = `
+                <div class="p-3 bg-green-100 text-green-800 rounded">
+                    ✅ Console log test successful - Check browser console (F12)
+                </div>
+            `;
+        });
+
+        // Test 2: Firebase
+        document.getElementById('test-firebase').addEventListener('click', async () => {
+            try {
+                console.log("Testing Firebase connection...");
+                const testQuery = await getDocs(collection(db, "ingredients"));
+                console.log("Firebase test successful. Found", testQuery.size, "ingredients");
+                
+                document.getElementById('results-content').innerHTML = `
+                    <div class="p-3 bg-green-100 text-green-800 rounded">
+                        ✅ Firebase connection successful! Found ${testQuery.size} ingredients
+                    </div>
+                `;
+            } catch (error) {
+                console.error("Firebase test failed:", error);
+                document.getElementById('results-content').innerHTML = `
+                    <div class="p-3 bg-red-100 text-red-800 rounded">
+                        ❌ Firebase test failed: ${error.message}
+                    </div>
+                `;
+            }
+        });
+
+        // Test 3: Save Ingredient
+        document.getElementById('test-save').addEventListener('click', async () => {
+            try {
+                console.log("Testing save ingredient...");
+                
+                const formData = {
+                    name: "Test Ingredient",
+                    quantity: 1000,
+                    unit: "g",
+                    price: 15.00,
+                    portions: 8,
+                    remaining: 8,
+                    createdAt: new Date()
+                };
+                
+                console.log("Saving ingredient:", formData);
+                const docRef = await addDoc(collection(db, "ingredients"), formData);
+                console.log("Document written with ID: ", docRef.id);
+                
+                document.getElementById('results-content').innerHTML = `
+                    <div class="p-3 bg-green-100 text-green-800 rounded">
+                        ✅ Ingredient saved successfully! ID: ${docRef.id}
+                    </div>
+                `;
+            } catch (error) {
+                console.error("Save test failed:", error);
+                document.getElementById('results-content').innerHTML = `
+                    <div class="p-3 bg-red-100 text-red-800 rounded">
+                        ❌ Save test failed: ${error.message}
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
+

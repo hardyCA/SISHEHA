@@ -1,0 +1,35 @@
+# REGLAS DE FIRESTORE PARA APLICAR EN FIREBASE CONSOLE
+
+## Pasos para aplicar las reglas:
+
+1. Ve a https://console.firebase.google.com/
+2. Selecciona tu proyecto "he-ha-4a4d0"
+3. En el menú lateral, haz clic en "Firestore Database"
+4. Ve a la pestaña "Rules"
+5. Reemplaza las reglas existentes con las siguientes:
+
+## Reglas a copiar y pegar:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read/write access to all documents for personal use
+    // IMPORTANTE: Esto es solo para uso personal. En producción, implementa reglas de seguridad apropiadas.
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+```
+
+6. Haz clic en "Publish" para aplicar las reglas
+
+## Nota importante:
+Estas reglas permiten acceso completo a la base de datos. Son apropiadas para uso personal, pero NO para aplicaciones en producción con múltiples usuarios.
+
+## Después de aplicar las reglas:
+- Recarga la página del sistema
+- Los errores de permisos deberían desaparecer
+- El sistema debería funcionar correctamente
+

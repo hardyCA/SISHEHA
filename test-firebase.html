@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Firebase</title>
+</head>
+<body>
+    <h1>Test Firebase Connection</h1>
+    <div id="status">Conectando...</div>
+    <button onclick="testWrite()">Test Write</button>
+    <button onclick="testRead()">Test Read</button>
+    <div id="results"></div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAp8LOa6N8abYxQZpqpYqSKUzKNIGePF-s",
+            authDomain: "he-ha-4a4d0.firebaseapp.com",
+            databaseURL: "https://he-ha-4a4d0.firebaseio.com",
+            projectId: "he-ha-4a4d0",
+            storageBucket: "he-ha-4a4d0.firebasestorage.app",
+            messagingSenderId: "728567998765",
+            appId: "1:728567998765:web:1a96da025b65cc8469cba4"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.getElementById('status').textContent = 'Firebase conectado correctamente!';
+
+        window.testWrite = async function() {
+            try {
+                const docRef = await addDoc(collection(db, "test"), {
+                    message: "Hello Firebase!",
+                    timestamp: new Date()
+                });
+                document.getElementById('results').innerHTML += `<p>Documento escrito con ID: ${docRef.id}</p>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML += `<p>Error al escribir: ${error.message}</p>`;
+            }
+        };
+
+        window.testRead = async function() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "test"));
+                let html = '<h3>Documentos encontrados:</h3>';
+                querySnapshot.forEach((doc) => {
+                    html += `<p>ID: ${doc.id}, Data: ${JSON.stringify(doc.data())}</p>`;
+                });
+                document.getElementById('results').innerHTML = html;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p>Error al leer: ${error.message}</p>`;
+            }
+        };
+    </script>
+</body>
+</html>
+

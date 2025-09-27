@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Ventas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4">Test Sistema de Ventas</h1>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Plato:</label>
+                <select id="test-dish" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    <option value="">Seleccionar plato</option>
+                    <option value="dish1" data-price="20.00">Pollo - Bs. 20.00</option>
+                    <option value="dish2" data-price="15.00">Salchipapa - Bs. 15.00</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad:</label>
+                <input type="number" id="test-quantity" value="1" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Precio:</label>
+                <input type="number" id="test-price" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+            </div>
+            
+            <button id="test-add" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">
+                Agregar Plato
+            </button>
+            
+            <button id="test-save" class="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600">
+                Guardar Venta
+            </button>
+        </div>
+        
+        <div id="test-items" class="mt-6">
+            <h3 class="font-semibold mb-2">Platos en la Venta:</h3>
+            <div id="test-items-list"></div>
+            <div id="test-total" class="mt-2 font-bold text-green-600">Total: Bs. 0.00</div>
+        </div>
+        
+        <div id="test-results" class="mt-6">
+            <h3 class="font-semibold mb-2">Resultados:</h3>
+            <div id="test-results-content" class="text-sm text-gray-600"></div>
+        </div>
+    </div>
+
+    <script>
+        let testSaleItems = [];
+
+        // Test dish selection
+        document.getElementById('test-dish').addEventListener('change', (e) => {
+            const selectedOption = e.target.selectedOptions[0];
+            if (selectedOption && selectedOption.dataset.price) {
+                document.getElementById('test-price').value = selectedOption.dataset.price;
+            }
+        });
+
+        // Test add dish
+        document.getElementById('test-add').addEventListener('click', () => {
+            const dishId = document.getElementById('test-dish').value;
+            const quantity = parseInt(document.getElementById('test-quantity').value);
+            const price = parseFloat(document.getElementById('test-price').value);
+
+            if (!dishId || !quantity || !price) {
+                alert('Por favor completa todos los campos');
+                return;
+            }
+
+            const dishName = document.getElementById('test-dish').selectedOptions[0].textContent.split(' - ')[0];
+
+            testSaleItems.push({
+                dishId: dishId,
+                dishName: dishName,
+                quantity: quantity,
+                price: price,
+                totalPrice: quantity * price
+            });
+
+            updateTestItemsList();
+            
+            // Clear form
+            document.getElementById('test-dish').value = '';
+            document.getElementById('test-quantity').value = '1';
+            document.getElementById('test-price').value = '';
+        });
+
+        // Test save sale
+        document.getElementById('test-save').addEventListener('click', () => {
+            if (testSaleItems.length === 0) {
+                alert('Agrega al menos un plato');
+                return;
+            }
+
+            const totalAmount = testSaleItems.reduce((sum, item) => sum + item.totalPrice, 0);
+            
+            document.getElementById('test-results-content').innerHTML = `
+                <div class="p-3 bg-green-100 text-green-800 rounded">
+                    ✅ Venta guardada exitosamente<br>
+                    Platos: ${testSaleItems.length}<br>
+                    Total: Bs. ${totalAmount.toFixed(2)}<br>
+                    Items: ${testSaleItems.map(item => `${item.dishName} (${item.quantity})`).join(', ')}
+                </div>
+            `;
+        });
+
+        function updateTestItemsList() {
+            const container = document.getElementById('test-items-list');
+            const totalDisplay = document.getElementById('test-total');
+
+            if (testSaleItems.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No hay platos agregados</p>';
+                totalDisplay.textContent = 'Total: Bs. 0.00';
+                return;
+            }
+
+            container.innerHTML = testSaleItems.map((item, index) => `
+                <div class="flex justify-between items-center p-2 bg-gray-50 rounded mb-1">
+                    <span>${item.dishName} (${item.quantity})</span>
+                    <span class="font-bold">Bs. ${item.totalPrice.toFixed(2)}</span>
+                </div>
+            `).join('');
+
+            const total = testSaleItems.reduce((sum, item) => sum + item.totalPrice, 0);
+            totalDisplay.textContent = `Total: Bs. ${total.toFixed(2)}`;
+        }
+    </script>
+</body>
+</html>
+

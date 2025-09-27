@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Ventas de Hoy - Actualización</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4">Test Ventas de Hoy - Actualización</h1>
+        
+        <div class="space-y-4">
+            <div class="p-4 bg-red-50 rounded-lg">
+                <h2 class="font-semibold text-red-800">Problema Identificado</h2>
+                <ul class="text-sm space-y-1">
+                    <li>❌ <strong>Después de hacer una venta</strong></li>
+                    <li>❌ <strong>"Ventas de Hoy" no se actualiza</strong></li>
+                    <li>❌ <strong>Solo se ve hasta actualizar la página</strong></li>
+                    <li>❌ <strong>Falta sincronización</strong> entre saveSale y loadTodaySales</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-green-50 rounded-lg">
+                <h2 class="font-semibold text-green-800">Solución Implementada</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ <strong>Agregado await</strong> a loadSales() en saveSale()</li>
+                    <li>✅ <strong>Orden correcto</strong>: loadSales() → loadTodaySales()</li>
+                    <li>✅ <strong>Logs agregados</strong> para debugging</li>
+                    <li>✅ <strong>Sincronización garantizada</strong></li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-blue-50 rounded-lg">
+                <h2 class="font-semibold text-blue-800">Cambios Realizados</h2>
+                <div class="text-xs font-mono bg-gray-100 p-2 rounded">
+                    <div><strong>En saveSale():</strong></div>
+                    <div>// ANTES:</div>
+                    <div>this.loadSales();</div>
+                    <div>this.loadTodaySales();</div>
+                    <br>
+                    <div>// DESPUÉS:</div>
+                    <div>await this.loadSales();</div>
+                    <div>this.loadTodaySales();</div>
+                    <br>
+                    <div><strong>En loadTodaySales():</strong></div>
+                    <div>console.log("Loading today sales...");</div>
+                    <div>console.log("Total sales:", this.sales.length);</div>
+                    <div>console.log("Today sales found:", todaySales.length);</div>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-yellow-50 rounded-lg">
+                <h2 class="font-semibold text-yellow-800">Flujo Corregido</h2>
+                <ol class="text-sm space-y-1">
+                    <li>1. <strong>Usuario hace venta</strong></li>
+                    <li>2. <strong>saveSale() ejecuta</strong></li>
+                    <li>3. <strong>await loadSales()</strong> - Recarga datos de Firebase</li>
+                    <li>4. <strong>loadTodaySales()</strong> - Usa datos actualizados</li>
+                    <li>5. <strong>updateDashboard()</strong> - Actualiza dashboard</li>
+                    <li>6. <strong>Venta aparece inmediatamente</strong> en "Ventas de Hoy"</li>
+                </ol>
+            </div>
+            
+            <div class="p-4 bg-purple-50 rounded-lg">
+                <h2 class="font-semibold text-purple-800">Prueba Final</h2>
+                <ol class="text-sm space-y-1">
+                    <li>1. <strong>Recargar index.html</strong> (F5)</li>
+                    <li>2. <strong>Abrir Console</strong> (F12)</li>
+                    <li>3. <strong>Ir a "Ventas"</strong></li>
+                    <li>4. <strong>Hacer una venta</strong></li>
+                    <li>5. <strong>Verificar que aparece inmediatamente</strong> en "Ventas de Hoy"</li>
+                    <li>6. <strong>Verificar logs</strong> en console</li>
+                </ol>
+            </div>
+            
+            <div class="p-4 bg-indigo-50 rounded-lg">
+                <h2 class="font-semibold text-indigo-800">Logs Esperados</h2>
+                <div class="text-xs font-mono bg-gray-100 p-2 rounded">
+                    <div>saveSale called</div>
+                    <div>Sales loaded: [array of sales]</div>
+                    <div>Loading today sales...</div>
+                    <div>Total sales: X</div>
+                    <div>Today sales found: Y</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

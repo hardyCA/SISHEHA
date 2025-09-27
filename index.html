@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>HEHA</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Sistema completo de gestión para restaurantes con control de inventario, ventas y caja">
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="HEHA">
+    <meta name="msapplication-TileColor" content="#10b981">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiMxMGI5ODEiLz4KPHN2ZyB4PSI0OCIgeT0iNDgiIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+CjxwYXRoIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyem0wIDJjNC40MSAwIDggMy41OSA4IDhzLTMuNTkgOC04IDgtOC0zLjU5LTgtOCAzLjU5LTggOC04em0wIDJjLTMuMzEgMC02IDIuNjktNiA2czIuNjkgNiA2IDYgNi0yLjY5IDYtNi0yLjY5LTYtNi02em0wIDJjMi4yMSAwIDQgMS43OSA0IDRzLTEuNzkgNC00IDQtNC0xLjc5LTQtNCAxLjc5LTQgNC00eiIvPgo8L3N2Zz4KPC9zdmc+">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iIzEwYjk4MSIvPgo8c3ZnIHg9IjgiIHk9IjgiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+CjxwYXRoIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyem0wIDJjNC40MSAwIDggMy41OSA4IDhzLTMuNTkgOC04IDgtOC0zLjU5LTgtOCAzLjU5LTggOC04em0wIDJjLTMuMzEgMC02IDIuNjktNiA2czIuNjkgNiA2IDYgNi0yLjY5IDYtNi0yLjY5LTYtNi02em0wIDJjMi4yMSAwIDQgMS43OSA0IDRzLTEuNzkgNC00IDQtNC0xLjc5LTQtNCAxLjc5LTQgNC00eiIvPgo8L3N2Zz4KPC9zdmc+">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- PWA Styles -->
+    <style>
+        /* Estilos específicos para PWA */
+        .pwa-mode {
+            /* Ajustes para cuando se ejecuta como PWA */
+            user-select: none;
+        }
+        
+        .pwa-mode .mobile-content {
+            /* Ajustar padding para PWA */
+            padding-bottom: 80px;
+        }
+        
+        /* Estilos para el botón de instalación */
+        .install-button {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Estilos para notificaciones */
+        .pwa-notification {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        /* Mejoras para pantallas táctiles */
+        @media (hover: none) and (pointer: coarse) {
+            .btn-mobile {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .fab {
+                min-height: 56px;
+                min-width: 56px;
+            }
+        }
+        
+        /* Estilos para modo standalone */
+        @media (display-mode: standalone) {
+            body {
+                user-select: none;
+                -webkit-user-select: none;
+                -webkit-touch-callout: none;
+            }
+            
+            .mobile-content {
+                padding-top: 0;
+            }
+            
+            header {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+            }
+        }
+        
+        /* Estilos para iOS */
+        @supports (-webkit-touch-callout: none) {
+            .pwa-mode .mobile-content {
+                padding-bottom: env(safe-area-inset-bottom, 80px);
+            }
+        }
+    </style>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                        secondary: {
+                            50: '#faf5ff',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                        }
+                    },
+                    animation: {
+                        'fadeIn': 'fadeIn 0.3s ease-in-out',
+                        'slideUp': 'slideUp 0.3s ease-out',
+                        'bounceIn': 'bounceIn 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(100%)' },
+                            '100%': { transform: 'translateY(0)' },
+                        },
+                        bounceIn: {
+                            '0%': { transform: 'scale(0.3)', opacity: '0' },
+                            '50%': { transform: 'scale(1.05)' },
+                            '70%': { transform: 'scale(0.9)' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Mobile-first custom styles */
+        .mobile-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .nav-toggle-btn {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .nav-chevron {
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .nav-chevron.rotated {
+            transform: rotate(180deg);
+        }
+        
+        .nav-items-collapsed {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+        
+        .nav-items-expanded {
+            max-height: 200px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+        
+        /* Dish Ingredients Collapsible Styles */
+        .ingredients-toggle-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .ingredients-toggle-btn:hover {
+            background-color: rgba(139, 92, 246, 0.1);
+            border-radius: 8px;
+        }
+        
+        .ingredients-chevron {
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .ingredients-chevron.rotated {
+            transform: rotate(180deg);
+        }
+        
+        .ingredients-list-collapsed {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+        
+        .ingredients-list-expanded {
+            max-height: 300px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+        
+        /* Dashboard Views */
+        .dashboard-view {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .dashboard-view.hidden {
+            display: none;
+        }
+        
+        .tab-active {
+            background-color: #10b981 !important;
+            color: white !important;
+        }
+        
+        .tab-inactive {
+            background-color: #e5e7eb !important;
+            color: #374151 !important;
+        }
+        
+        .mobile-content {
+            padding-bottom: 60px; /* Space for collapsed nav */
+            transition: padding-bottom 0.3s ease-in-out;
+        }
+        
+        .mobile-content.nav-expanded {
+            padding-bottom: 100px; /* Space for expanded nav */
+        }
+        
+        .fab {
+            position: fixed;
+            bottom: 120px;
+            right: 20px;
+            z-index: 40;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-mobile {
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-mobile {
+            min-height: 48px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .input-mobile {
+            min-height: 48px;
+            border-radius: 12px;
+            font-size: 16px; /* Prevents zoom on iOS */
+        }
+        
+        .modal-mobile {
+            border-radius: 20px 20px 0 0;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .chart-container {
+            height: 250px;
+            margin: 16px 0;
+        }
+        
+        .content-section {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        .nav-item {
+            transition: all 0.2s ease;
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        @media (min-width: 768px) {
+            .mobile-nav {
+                position: static;
+                background: transparent;
+                border-top: none;
+            }
+            
+            .mobile-content {
+                padding-bottom: 0;
+            }
+            
+            .fab {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="font-poppins bg-gray-50 min-h-screen">
+    <!-- Mobile Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+        <div class="px-4 py-3 flex items-center justify-between">
+            <h1 class="text-xl font-bold text-gray-800 flex-1 text-center">HEHA</h1>
+            <button id="notification-toggle" class="text-gray-600 hover:text-green-500 transition-colors duration-200" title="Activar/Desactivar notificaciones">
+                <i class="fas fa-bell-slash text-lg"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="mobile-content">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="content-section p-4">
+            <!-- Dashboard Navigation Tabs -->
+            <div class="bg-white card-mobile p-4 mb-4">
+                <div class="flex gap-2">
+                    <button id="comandas-tab" class="flex-1 btn-mobile bg-green-500 text-white hover:bg-green-600 transition-colors">
+                        <i class="fas fa-clipboard-list mr-2"></i>Comandas
+                    </button>
+                    <button id="stats-tab" class="flex-1 btn-mobile bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors">
+                        <i class="fas fa-chart-pie mr-2"></i>Estadísticas
+                    </button>
+                </div>
+            </div>
+
+            <!-- Comandas View (Default) -->
+            <div id="comandas-view" class="dashboard-view">
+                <div class="space-y-4">
+                    <!-- Active Orders -->
+                    <div class="bg-white card-mobile p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Órdenes Activas</h3>
+                        <div id="active-orders" class="space-y-2">
+                            <p class="text-gray-500 text-center py-4">No hay órdenes activas</p>
+                        </div>
+                    </div>
+
+                    <!-- Today's Orders -->
+                    <div class="bg-white card-mobile p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Órdenes de Hoy</h3>
+                        <div id="today-orders" class="space-y-2">
+                            <p class="text-gray-500 text-center py-4">No hay órdenes hoy</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics View -->
+            <div id="stats-view" class="dashboard-view hidden">
+                <div class="space-y-4">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white card-mobile p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Ingredientes</p>
+                                <p class="text-2xl font-bold text-blue-600" id="total-ingredients">0</p>
+                            </div>
+                            <i class="fas fa-carrot text-2xl text-blue-500"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white card-mobile p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Platos</p>
+                                <p class="text-2xl font-bold text-purple-600" id="total-dishes">0</p>
+                            </div>
+                            <i class="fas fa-utensils text-2xl text-purple-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Sales -->
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Ventas de Hoy</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total:</span>
+                            <span class="font-semibold text-green-600" id="today-total">Bs. 0.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Ganancia:</span>
+                            <span class="font-semibold text-blue-600" id="today-profit">Bs. 0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Sales -->
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Ventas Recientes</h3>
+                    <div id="recent-sales" class="space-y-2">
+                        <p class="text-gray-500 text-center py-4">No hay ventas hoy</p>
+                    </div>
+                </div>
+
+                <!-- Dishes Sold Today -->
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Platos Vendidos Hoy</h3>
+                    <div id="dishes-sold-today" class="space-y-2">
+                        <p class="text-gray-500 text-center py-4">No hay ventas hoy</p>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ingredients Section -->
+        <section id="ingredients" class="content-section hidden p-4">
+            <div class="space-y-4">
+                <div class="bg-white card-mobile p-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Ingredientes</h2>
+                    <button id="add-ingredient-btn" class="w-full btn-mobile bg-blue-500 text-white hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Agregar Ingrediente
+                    </button>
+                </div>
+                <div id="ingredients-list" class="space-y-3">
+                    <!-- Ingredients will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Dishes Section -->
+        <section id="dishes" class="content-section hidden p-4">
+            <div class="space-y-4">
+                <div class="bg-white card-mobile p-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Platos</h2>
+                    <button id="add-dish-btn" class="w-full btn-mobile bg-purple-500 text-white hover:bg-purple-600 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Agregar Plato
+                    </button>
+                </div>
+                <div id="dishes-list" class="space-y-3">
+                    <!-- Dishes will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Sales Section -->
+        <section id="sales" class="content-section hidden p-4">
+            <div class="space-y-4">
+                <div class="bg-white card-mobile p-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Nueva Venta</h2>
+                    <button id="new-sale-btn" class="w-full btn-mobile bg-green-500 text-white hover:bg-green-600 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Nueva Venta
+                    </button>
+                </div>
+                
+                <!-- Today's Sales List -->
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Ventas de Hoy</h3>
+                    <div id="today-sales-list" class="space-y-2">
+                        <!-- Today's sales will be loaded here -->
+                    </div>
+                </div>
+                
+                <div id="sales-list" class="space-y-3">
+                    <!-- Sales will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Reports Section -->
+        <section id="reports" class="content-section hidden p-4">
+            <div class="space-y-4">
+                <div class="bg-white card-mobile p-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Reportes</h2>
+                    <div class="space-y-3">
+                        <input type="date" id="report-date" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none">
+                        <button id="generate-report" class="w-full btn-mobile bg-indigo-500 text-white hover:bg-indigo-600 transition-colors">
+                            <i class="fas fa-chart-bar mr-2"></i>Generar Reporte
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Period Selector -->
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Período</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button class="period-btn btn-mobile bg-blue-500 text-white" data-period="daily">Diario</button>
+                        <button class="period-btn btn-mobile bg-gray-200 text-gray-700" data-period="weekly">Semanal</button>
+                        <button class="period-btn btn-mobile bg-gray-200 text-gray-700" data-period="monthly">Mensual</button>
+                        <button class="period-btn btn-mobile bg-gray-200 text-gray-700" data-period="yearly">Anual</button>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Tendencia de Ventas</h3>
+                    <div class="chart-container">
+                        <canvas id="salesTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Platos Más Vendidos</h3>
+                    <div class="chart-container">
+                        <canvas id="topDishesChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Ventas por Día de la Semana</h3>
+                    <div class="chart-container">
+                        <canvas id="dayOfWeekChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Ventas Mensuales</h3>
+                    <div class="chart-container">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white">
+                        <div class="text-center">
+                            <p class="text-sm opacity-90">Total Ventas</p>
+                            <p class="text-xl font-bold" id="total-sales-amount">Bs. 0.00</p>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 text-white">
+                        <div class="text-center">
+                            <p class="text-sm opacity-90">Total Ganancia</p>
+                            <p class="text-xl font-bold" id="total-profit-amount">Bs. 0.00</p>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 text-white">
+                        <div class="text-center">
+                            <p class="text-sm opacity-90">Total Items</p>
+                            <p class="text-xl font-bold" id="total-items-count">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-4 text-white">
+                        <div class="text-center">
+                            <p class="text-sm opacity-90">Promedio Venta</p>
+                            <p class="text-xl font-bold" id="average-sale-amount">Bs. 0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sales Detail -->
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Detalle de Ventas</h3>
+                    <div id="sales-detail" class="space-y-2">
+                        <p class="text-gray-500 text-center py-4">No hay ventas para mostrar</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cash Register Section -->
+        <section id="cash-register" class="content-section hidden p-4">
+            <div class="space-y-4">
+                <!-- Cash Amounts -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-white card-mobile p-4">
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600">Capital</p>
+                            <p class="text-2xl font-bold text-blue-600" id="cash-capital-amount">Bs. 0.00</p>
+                        </div>
+                    </div>
+                    <div class="bg-white card-mobile p-4">
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600">Ganancias</p>
+                            <p class="text-2xl font-bold text-green-600" id="cash-profit-amount">Bs. 0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Movement -->
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Movimiento de Caja</h3>
+                    <button id="add-cash-movement-btn" class="w-full btn-mobile bg-orange-500 text-white hover:bg-orange-600 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Agregar Movimiento
+                    </button>
+                </div>
+
+                <!-- Today's Movements -->
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Movimientos de Hoy</h3>
+                    <div id="cash-movement-history-list" class="space-y-2">
+                        <p class="text-gray-500 text-center py-4">No hay movimientos hoy</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="mobile-nav" id="bottom-nav">
+        <!-- Toggle Button (Always Visible) -->
+        <div class="flex justify-center py-2">
+            <button id="nav-toggle" class="nav-toggle-btn bg-blue-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-600 transition-all duration-300">
+                <i class="fas fa-bars text-sm mr-2"></i>
+                <span class="text-sm font-medium">Menú</span>
+                <i class="fas fa-chevron-up text-xs ml-2 nav-chevron transition-transform duration-300"></i>
+            </button>
+        </div>
+        
+        <!-- Navigation Items (Collapsible) -->
+        <div id="nav-items" class="nav-items-collapsed">
+            <div class="py-2">
+                <!-- First Row -->
+                <div class="flex justify-around mb-1">
+                    <button class="nav-item active flex flex-col items-center py-2 px-2 rounded-lg" data-section="dashboard">
+                        <i class="fas fa-chart-pie text-base mb-1"></i>
+                        <span class="text-xs">Dashboard</span>
+                    </button>
+                    <button class="nav-item flex flex-col items-center py-2 px-2 rounded-lg" data-section="ingredients">
+                        <i class="fas fa-carrot text-base mb-1"></i>
+                        <span class="text-xs">Ingredientes</span>
+                    </button>
+                    <button class="nav-item flex flex-col items-center py-2 px-2 rounded-lg" data-section="dishes">
+                        <i class="fas fa-utensils text-base mb-1"></i>
+                        <span class="text-xs">Platos</span>
+                    </button>
+                </div>
+                <!-- Second Row -->
+                <div class="flex justify-around">
+                    <button class="nav-item flex flex-col items-center py-2 px-2 rounded-lg" data-section="sales">
+                        <i class="fas fa-shopping-cart text-base mb-1"></i>
+                        <span class="text-xs">Ventas</span>
+                    </button>
+                    <button class="nav-item flex flex-col items-center py-2 px-2 rounded-lg" data-section="reports">
+                        <i class="fas fa-chart-bar text-base mb-1"></i>
+                        <span class="text-xs">Reportes</span>
+                    </button>
+                    <button class="nav-item flex flex-col items-center py-2 px-2 rounded-lg" data-section="cash-register">
+                        <i class="fas fa-cash-register text-base mb-1"></i>
+                        <span class="text-xs">Caja</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- FAB for Quick Actions -->
+    <button class="fab bg-blue-500 text-white hover:bg-blue-600 transition-colors" id="quick-action-fab">
+        <i class="fas fa-plus text-xl"></i>
+    </button>
+
+    <!-- Modals will be added here -->
+    <!-- Ingredient Modal -->
+    <div id="ingredient-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="fixed bottom-0 left-0 right-0 bg-white modal-mobile">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Agregar Ingrediente</h3>
+                    <button class="close text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form id="ingredient-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+                        <input type="text" id="ingredient-name" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Precio Total (Bs.)</label>
+                        <input type="number" id="ingredient-price" step="0.01" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Porciones que Rinde</label>
+                        <input type="number" id="ingredient-portions" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Costo por Porción (Bs.)</label>
+                        <input type="number" id="cost-per-portion" step="0.01" class="w-full input-mobile border border-gray-300 px-3 py-2 bg-gray-100" readonly>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button" id="cancel-ingredient" class="flex-1 btn-mobile bg-gray-500 text-white hover:bg-gray-600 transition-colors">Cancelar</button>
+                        <button type="submit" class="flex-1 btn-mobile bg-blue-500 text-white hover:bg-blue-600 transition-colors">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dish Modal -->
+    <div id="dish-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="fixed bottom-0 left-0 right-0 bg-white modal-mobile">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Agregar Plato</h3>
+                    <button class="close text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form id="dish-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Plato</label>
+                        <input type="text" id="dish-name" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-purple-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Precio de Venta (Bs.)</label>
+                        <input type="number" id="dish-price" step="0.01" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-purple-500 focus:outline-none" required>
+                    </div>
+                    
+                    <!-- Ingredients Section -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="text-sm font-semibold text-gray-700">Ingredientes del Plato</label>
+                            <span id="dish-total-cost" class="text-sm font-bold text-purple-600">Costo: Bs. 0.00</span>
+                        </div>
+                        
+                        <div id="dish-ingredients" class="space-y-3 mb-4 max-h-64 overflow-y-auto">
+                            <!-- Ingredients will be added here -->
+                        </div>
+                        
+                        <div class="border-t border-gray-200 pt-3">
+                            <div class="flex gap-2">
+                                <select id="dish-ingredient-select" class="flex-1 input-mobile border border-gray-300 px-3 py-2 focus:border-purple-500 focus:outline-none text-sm">
+                                    <option value="">Seleccionar ingrediente</option>
+                                </select>
+                                <button type="button" id="add-ingredient-to-dish" class="btn-mobile bg-purple-500 text-white hover:bg-purple-600 transition-colors px-4 py-2 text-sm">
+                                    <i class="fas fa-plus mr-1"></i>Agregar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button type="button" id="cancel-dish" class="flex-1 btn-mobile bg-gray-500 text-white hover:bg-gray-600 transition-colors">Cancelar</button>
+                        <button type="submit" class="flex-1 btn-mobile bg-purple-500 text-white hover:bg-purple-600 transition-colors">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sale Modal -->
+    <div id="sale-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="fixed bottom-0 left-0 right-0 bg-white modal-mobile">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Nueva Venta</h3>
+                    <button class="close text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form id="sale-form" class="space-y-4">
+                    <!-- Plato Selection -->
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Plato</label>
+                            <select id="sale-dish" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none">
+                                <option value="">Seleccionar plato</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Quantity and Price Row -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad</label>
+                                <input type="number" id="sale-quantity" placeholder="Cant." min="1" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none" value="1">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Precio (Bs.)</label>
+                                <input type="number" id="sale-price" placeholder="Precio" step="0.01" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none">
+                            </div>
+                        </div>
+                        
+                        <!-- Add Button -->
+                        <button type="button" id="add-dish-to-sale" class="w-full btn-mobile bg-green-500 text-white hover:bg-green-600 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>Agregar a la Venta
+                        </button>
+                    </div>
+                    
+                    <!-- Sale Items List -->
+                    <div id="sale-items-list" class="space-y-2">
+                        <!-- Items will be added here -->
+                    </div>
+                    
+                    <!-- Total -->
+                    <div class="bg-gray-100 p-3 rounded-lg">
+                        <div class="flex justify-between text-lg font-semibold">
+                            <span>Total:</span>
+                            <span id="sale-total">Bs. 0.00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button type="button" id="cancel-sale" class="flex-1 btn-mobile bg-gray-500 text-white hover:bg-gray-600 transition-colors">Cancelar</button>
+                        <button type="submit" id="save-sale" class="flex-1 btn-mobile bg-green-500 text-white hover:bg-green-600 transition-colors">Guardar Venta</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cash Movement Modal -->
+    <div id="cash-movement-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="fixed bottom-0 left-0 right-0 bg-white modal-mobile">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Movimiento de Caja</h3>
+                    <button class="close text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form id="cash-movement-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                        <input type="text" id="movement-description" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-orange-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad (Bs.)</label>
+                        <input type="number" id="movement-amount" step="0.01" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-orange-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
+                        <select id="movement-type" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-orange-500 focus:outline-none" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="income">Entrada de Dinero</option>
+                            <option value="expense">Salida de Dinero</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Fuente</label>
+                        <select id="movement-source" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-orange-500 focus:outline-none" required>
+                            <option value="">Seleccionar fuente</option>
+                            <option value="capital">Capital</option>
+                            <option value="profit">Ganancias</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button" id="cancel-cash-movement" class="flex-1 btn-mobile bg-gray-500 text-white hover:bg-gray-600 transition-colors">Cancelar</button>
+                        <button type="submit" class="flex-1 btn-mobile bg-orange-500 text-white hover:bg-orange-600 transition-colors">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, limit, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAp8LOa6N8abYxQZpqpYqSKUzKNIGePF-s",
+            authDomain: "he-ha-4a4d0.firebaseapp.com",
+            databaseURL: "https://he-ha-4a4d0.firebaseio.com",
+            projectId: "he-ha-4a4d0",
+            storageBucket: "he-ha-4a4d0.firebasestorage.app",
+            messagingSenderId: "728567998765",
+            appId: "1:728567998765:web:1a96da025b65cc8469cba4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase functions globally available
+        window.db = db;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.getDocs = getDocs;
+        window.doc = doc;
+        window.updateDoc = updateDoc;
+        window.deleteDoc = deleteDoc;
+        window.query = query;
+        window.where = where;
+        window.orderBy = orderBy;
+        window.onSnapshot = onSnapshot;
+        window.limit = limit;
+        window.setDoc = setDoc;
+    </script>
+
+    <!-- Collapsible Navigation Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navToggle = document.getElementById('nav-toggle');
+            const navItems = document.getElementById('nav-items');
+            const mobileContent = document.querySelector('.mobile-content');
+            const chevron = document.querySelector('.nav-chevron');
+            
+            let isExpanded = false;
+            
+            navToggle.addEventListener('click', function() {
+                isExpanded = !isExpanded;
+                
+                if (isExpanded) {
+                    // Expand navigation
+                    navItems.classList.remove('nav-items-collapsed');
+                    navItems.classList.add('nav-items-expanded');
+                    mobileContent.classList.add('nav-expanded');
+                    chevron.classList.add('rotated');
+                    
+                    // Update button text
+                    navToggle.querySelector('span').textContent = 'Cerrar';
+                } else {
+                    // Collapse navigation
+                    navItems.classList.remove('nav-items-expanded');
+                    navItems.classList.add('nav-items-collapsed');
+                    mobileContent.classList.remove('nav-expanded');
+                    chevron.classList.remove('rotated');
+                    
+                    // Update button text
+                    navToggle.querySelector('span').textContent = 'Menú';
+                }
+            });
+            
+            // Auto-collapse when clicking on nav items
+            const navButtons = document.querySelectorAll('.nav-item');
+            navButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Small delay to allow navigation to complete
+                    setTimeout(() => {
+                        if (isExpanded) {
+                            isExpanded = false;
+                            navItems.classList.remove('nav-items-expanded');
+                            navItems.classList.add('nav-items-collapsed');
+                            mobileContent.classList.remove('nav-expanded');
+                            chevron.classList.remove('rotated');
+                            navToggle.querySelector('span').textContent = 'Menú';
+                        }
+                    }, 300);
+                });
+            });
+        });
+        
+        // Global function for toggling ingredients in dish cards
+        function toggleIngredients(dishId) {
+            const ingredientsList = document.getElementById(`ingredients-list-${dishId}`);
+            const chevron = document.querySelector(`.ingredients-chevron-${dishId}`);
+            
+            if (ingredientsList && chevron) {
+                if (ingredientsList.classList.contains('ingredients-list-collapsed')) {
+                    // Expand
+                    ingredientsList.classList.remove('ingredients-list-collapsed');
+                    ingredientsList.classList.add('ingredients-list-expanded');
+                    chevron.classList.add('rotated');
+                } else {
+                    // Collapse
+                    ingredientsList.classList.remove('ingredients-list-expanded');
+                    ingredientsList.classList.add('ingredients-list-collapsed');
+                    chevron.classList.remove('rotated');
+                }
+            }
+        }
+        
+        // Dashboard tabs functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const comandasTab = document.getElementById('comandas-tab');
+            const statsTab = document.getElementById('stats-tab');
+            const comandasView = document.getElementById('comandas-view');
+            const statsView = document.getElementById('stats-view');
+            
+            if (comandasTab && statsTab && comandasView && statsView) {
+                // Set default view (Comandas) - but wait for restaurantManager to be ready
+                setTimeout(() => {
+                    if (window.restaurantManager) {
+                        showComandasView();
+                    }
+                }, 500);
+                
+                comandasTab.addEventListener('click', function() {
+                    showComandasView();
+                });
+                
+                statsTab.addEventListener('click', function() {
+                    showStatsView();
+                });
+            }
+            
+            function showComandasView() {
+                // Show comandas view
+                comandasView.classList.remove('hidden');
+                statsView.classList.add('hidden');
+                
+                // Update tab styles
+                comandasTab.classList.remove('tab-inactive');
+                comandasTab.classList.add('tab-active');
+                statsTab.classList.remove('tab-active');
+                statsTab.classList.add('tab-inactive');
+                
+                // Load comandas data immediately
+                loadComandasData();
+                
+                // Also update comandas display if restaurantManager is available
+                if (window.restaurantManager && window.restaurantManager.sales) {
+                    setTimeout(() => {
+                        window.updateComandasDisplay(window.restaurantManager.sales);
+                    }, 100);
+                }
+            }
+            
+            function showStatsView() {
+                // Show stats view
+                statsView.classList.remove('hidden');
+                comandasView.classList.add('hidden');
+                
+                // Update tab styles
+                statsTab.classList.remove('tab-inactive');
+                statsTab.classList.add('tab-active');
+                comandasTab.classList.remove('tab-active');
+                comandasTab.classList.add('tab-inactive');
+            }
+            
+            function loadComandasData() {
+                // This will be called when showing comandas view
+                // For now, we'll use the existing sales data to show as orders
+                console.log("loadComandasData called");
+                if (window.restaurantManager && window.restaurantManager.sales) {
+                    console.log("Loading comandas with", window.restaurantManager.sales.length, "sales");
+                    window.updateComandasDisplay(window.restaurantManager.sales);
+                } else {
+                    console.log("restaurantManager not ready or no sales data");
+                    // Show empty state
+                    const activeOrdersEl = document.getElementById('active-orders');
+                    const todayOrdersEl = document.getElementById('today-orders');
+                    if (activeOrdersEl) {
+                        activeOrdersEl.innerHTML = '<p class="text-gray-500 text-center py-4">Cargando órdenes...</p>';
+                    }
+                    if (todayOrdersEl) {
+                        todayOrdersEl.innerHTML = '<p class="text-gray-500 text-center py-4">Cargando órdenes...</p>';
+                    }
+                }
+            }
+            
+            // Make updateComandasDisplay global so it can be called from RestaurantManager
+            let lastUpdateTime = 0;
+            let lastProcessedSales = new Set(); // Track processed sales to avoid duplicates
+            
+            window.updateComandasDisplay = function(salesData) {
+                const now = Date.now();
+                // Prevent multiple updates within 200ms to avoid duplicates
+                if (now - lastUpdateTime < 200) {
+                    console.log("Skipping updateComandasDisplay - too soon after last update");
+                    return;
+                }
+                lastUpdateTime = now;
+                
+                console.log("updateComandasDisplay called with", salesData ? salesData.length : 0, "sales");
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                // Use provided sales data or fallback to window.restaurantManager.sales
+                const sales = salesData || (window.restaurantManager && window.restaurantManager.sales) || [];
+                
+                // Create a unique identifier for this update to prevent duplicates
+                const updateId = Date.now() + Math.random();
+                console.log("Processing update with ID:", updateId);
+                
+                const todaySales = sales.filter((sale) => {
+                    let saleDate;
+                    if (sale.createdAt && sale.createdAt.toDate) {
+                        saleDate = sale.createdAt.toDate();
+                    } else if (sale.createdAt) {
+                        saleDate = new Date(sale.createdAt);
+                    } else {
+                        return false;
+                    }
+                    saleDate.setHours(0, 0, 0, 0);
+                    return saleDate.getTime() === today.getTime();
+                });
+                
+                // Remove duplicates based on sale ID and creation time
+                const uniqueTodaySales = [];
+                const seenSales = new Set();
+                
+                todaySales.forEach(sale => {
+                    // Create a unique key based on ID and creation time
+                    const saleKey = `${sale.id || 'no-id'}-${sale.createdAt ? (sale.createdAt.toDate ? sale.createdAt.toDate().getTime() : new Date(sale.createdAt).getTime()) : 'no-time'}`;
+                    
+                    if (!seenSales.has(saleKey)) {
+                        seenSales.add(saleKey);
+                        uniqueTodaySales.push(sale);
+                    } else {
+                        console.log("Duplicate sale detected and removed:", saleKey);
+                    }
+                });
+                
+                console.log(`Filtered ${todaySales.length} sales to ${uniqueTodaySales.length} unique sales`);
+                
+                // Clear containers completely to prevent any residual elements
+                const todayOrdersEl = document.getElementById('today-orders');
+                const activeOrdersEl = document.getElementById('active-orders');
+                
+                if (todayOrdersEl) {
+                    todayOrdersEl.innerHTML = '';
+                }
+                if (activeOrdersEl) {
+                    activeOrdersEl.innerHTML = '';
+                }
+                
+                // Update Today's Orders (show all orders with status indicator)
+                if (todayOrdersEl) {
+                    if (uniqueTodaySales.length === 0) {
+                        todayOrdersEl.innerHTML = '<p class="text-gray-500 text-center py-4">No hay órdenes hoy</p>';
+                    } else {
+                        const sortedTodaySales = uniqueTodaySales
+                            .sort((a, b) => {
+                                const dateA = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+                                const dateB = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+                                return dateB - dateA;
+                            })
+                            .slice(0, 10);
+                        
+                        todayOrdersEl.innerHTML = sortedTodaySales
+                            .map((sale, index) => {
+                                const saleTime = sale.createdAt && sale.createdAt.toDate ? 
+                                    sale.createdAt.toDate() : new Date(sale.createdAt);
+                                const timeString = saleTime.toLocaleTimeString('es-ES', { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                });
+                                
+                                let dishesList = '';
+                                if (sale.items && sale.items.length > 0) {
+                                    dishesList = sale.items
+                                        .map(item => `${item.dishName} (${item.quantity})`)
+                                        .join(', ');
+                                } else if (sale.dishName) {
+                                    dishesList = `${sale.dishName} (${sale.quantity || 1})`;
+                                }
+
+                                // Determine status and styling
+                                const isCompleted = sale.status === 'completed';
+                                const borderColor = isCompleted ? 'border-gray-400' : 'border-blue-500';
+                                const textColor = isCompleted ? 'text-gray-600' : 'text-blue-600';
+                                const statusIcon = isCompleted ? 'fas fa-check-circle text-green-500' : 'fas fa-clock text-orange-500';
+                                const statusText = isCompleted ? 'Completada' : 'Activa';
+                                
+                                return `
+                                    <div class="bg-white card-mobile p-3 border-l-4 ${borderColor}">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between mb-1">
+                                                    <div class="flex items-center">
+                                                        <span class="text-sm font-semibold text-gray-800">Orden #${index + 1} - ${timeString}</span>
+                                                        <i class="${statusIcon} ml-2 text-xs"></i>
+                                                        <span class="text-xs ${isCompleted ? 'text-green-600' : 'text-orange-600'} ml-1">${statusText}</span>
+                                                    </div>
+                                                    <span class="text-sm font-bold ${textColor}">Bs. ${(sale.totalAmount || sale.total || 0).toFixed(2)}</span>
+                                                </div>
+                                                <p class="text-xs text-gray-600">${dishesList}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            })
+                            .join("");
+                    }
+                }
+                
+                // Update Active Orders (only show orders with status 'active' or undefined for backward compatibility)
+                if (activeOrdersEl) {
+                    const activeOrders = uniqueTodaySales
+                        .filter(sale => !sale.status || sale.status === 'active')
+                        .sort((a, b) => {
+                            const dateA = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+                            const dateB = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+                            return dateB - dateA;
+                        });
+                    
+                    if (activeOrders.length === 0) {
+                        activeOrdersEl.innerHTML = '<p class="text-gray-500 text-center py-4">No hay órdenes activas</p>';
+                    } else {
+                        activeOrdersEl.innerHTML = activeOrders
+                            .map((sale, index) => {
+                                const saleTime = sale.createdAt && sale.createdAt.toDate ? 
+                                    sale.createdAt.toDate() : new Date(sale.createdAt);
+                                const timeString = saleTime.toLocaleTimeString('es-ES', { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                });
+                                
+                                let dishesList = '';
+                                if (sale.items && sale.items.length > 0) {
+                                    dishesList = sale.items
+                                        .map(item => `${item.dishName} (${item.quantity})`)
+                                        .join(', ');
+                                } else if (sale.dishName) {
+                                    dishesList = `${sale.dishName} (${sale.quantity || 1})`;
+                                }
+                                
+                                return `
+                                    <div class="bg-white card-mobile p-3 border-l-4 border-green-500">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between mb-1">
+                                                    <span class="text-sm font-semibold text-gray-800">Orden #${index + 1} - ${timeString}</span>
+                                                    <span class="text-sm font-bold text-green-600">Bs. ${(sale.totalAmount || sale.total || 0).toFixed(2)}</span>
+                                                </div>
+                                                <p class="text-xs text-gray-600">${dishesList}</p>
+                                            </div>
+                                            <button onclick="restaurantManager.completeOrder('${sale.id}')" 
+                                                    class="ml-2 bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-xs transition-colors duration-200">
+                                                <i class="fas fa-check mr-1"></i>Completar
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                            })
+                            .join("");
+                    }
+                }
+            };
+        });
+    </script>
+
+    <!-- App Script -->
+    <script src="app.js"></script>
+    
+    <!-- PWA Installation and Service Worker -->
+    <script>
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker registrado exitosamente:', registration.scope);
+                        
+                        // Verificar si hay actualizaciones
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Hay una nueva versión disponible
+                                    showUpdateNotification();
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.log('Error al registrar Service Worker:', error);
+                    });
+            });
+        }
+
+        // Variables para el prompt de instalación
+        let deferredPrompt;
+        let installButton;
+
+        // Detectar cuando la app se puede instalar
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('PWA se puede instalar');
+            // Prevenir que se muestre automáticamente
+            e.preventDefault();
+            // Guardar el evento para usarlo después
+            deferredPrompt = e;
+            // Mostrar botón de instalación
+            showInstallButton();
+        });
+
+        // Detectar cuando la app se instala
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA instalada exitosamente');
+            hideInstallButton();
+            showMessage('¡HEHA se ha instalado correctamente!', 'success');
+        });
+
+        // Función para mostrar el botón de instalación
+        function showInstallButton() {
+            // Crear botón de instalación si no existe
+            if (!installButton) {
+                installButton = document.createElement('button');
+                installButton.innerHTML = '<i class="fas fa-download mr-2"></i>Instalar HEHA';
+                installButton.className = 'fixed bottom-20 right-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-colors duration-200';
+                installButton.style.display = 'none';
+                installButton.onclick = installPWA;
+                document.body.appendChild(installButton);
+            }
+            
+            // Mostrar el botón
+            installButton.style.display = 'block';
+            
+            // Auto-ocultar después de 10 segundos
+            setTimeout(() => {
+                if (installButton && installButton.style.display === 'block') {
+                    installButton.style.display = 'none';
+                }
+            }, 10000);
+        }
+
+        // Función para ocultar el botón de instalación
+        function hideInstallButton() {
+            if (installButton) {
+                installButton.style.display = 'none';
+            }
+        }
+
+        // Función para instalar la PWA
+        function installPWA() {
+            if (deferredPrompt) {
+                // Mostrar el prompt de instalación
+                deferredPrompt.prompt();
+                
+                // Esperar la respuesta del usuario
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Usuario aceptó instalar la PWA');
+                    } else {
+                        console.log('Usuario rechazó instalar la PWA');
+                    }
+                    // Limpiar el prompt
+                    deferredPrompt = null;
+                    hideInstallButton();
+                });
+            }
+        }
+
+        // Función para mostrar notificación de actualización
+        function showUpdateNotification() {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 left-4 right-4 bg-blue-500 text-white p-4 rounded-lg shadow-lg z-50';
+            notification.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        <span class="font-semibold">Nueva versión disponible</span>
+                    </div>
+                    <button onclick="updateApp()" class="bg-white text-blue-500 px-3 py-1 rounded text-sm font-semibold">
+                        Actualizar
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            // Auto-ocultar después de 10 segundos
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 10000);
+        }
+
+        // Función para actualizar la app
+        function updateApp() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then((registration) => {
+                    if (registration && registration.waiting) {
+                        // Enviar mensaje al service worker para que se active
+                        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                        // Recargar la página
+                        window.location.reload();
+                    }
+                });
+            }
+        }
+
+        // Detectar si la app se está ejecutando como PWA
+        function isPWA() {
+            return window.matchMedia('(display-mode: standalone)').matches || 
+                   window.navigator.standalone === true;
+        }
+
+        // Mostrar mensaje de bienvenida si es PWA
+        if (isPWA()) {
+            console.log('HEHA ejecutándose como PWA');
+            // Agregar clase CSS para PWA
+            document.body.classList.add('pwa-mode');
+        }
+
+        // Función helper para mostrar mensajes (si no existe)
+        if (typeof showMessage === 'undefined') {
+            function showMessage(message, type = 'info') {
+                const notification = document.createElement('div');
+                const bgColor = type === 'success' ? 'bg-green-500' : 
+                               type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+                notification.className = `fixed top-4 left-4 right-4 ${bgColor} text-white p-4 rounded-lg shadow-lg z-50`;
+                notification.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold">${message}</span>
+                        <button onclick="this.parentNode.parentNode.remove()" class="text-white hover:text-gray-200">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(notification);
+                
+                // Auto-ocultar después de 5 segundos
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 5000);
+            }
+        }
+
+        // ===== NOTIFICACIONES PUSH PARA COMANDAS =====
+        
+        // Variables para notificaciones push
+        let pushSubscription = null;
+        let isPushEnabled = false;
+
+        // Función para solicitar permisos de notificación
+        async function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                console.log('Este navegador no soporta notificaciones');
+                return false;
+            }
+
+            if (Notification.permission === 'granted') {
+                console.log('Permisos de notificación ya concedidos');
+                return true;
+            }
+
+            if (Notification.permission === 'denied') {
+                console.log('Permisos de notificación denegados');
+                return false;
+            }
+
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                console.log('Permisos de notificación concedidos');
+                showMessage('Notificaciones activadas para comandas', 'success');
+                return true;
+            } else {
+                console.log('Permisos de notificación denegados');
+                showMessage('Las notificaciones están desactivadas', 'error');
+                return false;
+            }
+        }
+
+        // Función para suscribirse a notificaciones push
+        async function subscribeToPush() {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                console.log('Push messaging no soportado');
+                return null;
+            }
+
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array('BEl62iUYgUivxIkv69yViEuiBIa40HIcF6V7N3E9NFVduS8Bw8_2VJQWHYkibHvHyov5h2VgTz2-W70JavR6dF8')
+                });
+
+                console.log('Suscripción push exitosa:', subscription);
+                pushSubscription = subscription;
+                isPushEnabled = true;
+                
+                // Guardar suscripción en localStorage
+                localStorage.setItem('pushSubscription', JSON.stringify(subscription));
+                
+                return subscription;
+            } catch (error) {
+                console.error('Error al suscribirse a push:', error);
+                return null;
+            }
+        }
+
+        // Función para convertir clave VAPID
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding)
+                .replace(/-/g, '+')
+                .replace(/_/g, '/');
+
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        // Función para enviar notificación push local (simulación)
+        function sendLocalPushNotification(title, body, data = {}) {
+            if (!isPushEnabled || !pushSubscription) {
+                console.log('Push no habilitado, mostrando notificación local');
+                showLocalNotification(title, body, data);
+                return;
+            }
+
+            // Simular envío de notificación push
+            // En un entorno real, esto se enviaría desde el servidor
+            console.log('Enviando notificación push:', { title, body, data });
+            
+            // Mostrar notificación local como fallback
+            showLocalNotification(title, body, data);
+        }
+
+        // Función para mostrar notificación local
+        function showLocalNotification(title, body, data = {}) {
+            if (Notification.permission === 'granted') {
+                const notification = new Notification(title, {
+                    body: body,
+                    icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiMxMGI5ODEiLz4KPHN2ZyB4PSI0OCIgeT0iNDgiIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+CjxwYXRoIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyem0wIDJjNC40MSAwIDggMy41OSA4IDhzLTMuNTkgOC04IDgtOC0zLjU5LTgtOCAzLjU5LTggOC04em0wIDJjLTMuMzEgMC02IDIuNjktNiA2czIuNjkgNiA2IDYgNi0yLjY5IDYtNi0yLjY5LTYtNi02em0wIDJjMi4yMSAwIDQgMS43OSA0IDRzLTEuNzkgNC00IDQtNC0xLjc5LTQtNCAxLjc5LTQgNC00eiIvPgo8L3N2Zz4KPC9zdmc+',
+                    badge: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2IiByeD0iMTIiIGZpbGw9IiMxMGI5ODEiLz4KPC9zdmc+',
+                    vibrate: [200, 100, 200, 100, 200],
+                    requireInteraction: true,
+                    silent: false,
+                    data: data,
+                    tag: 'heha-comanda'
+                });
+
+                // Reproducir sonido de notificación
+                playNotificationSound();
+
+                // Manejar clic en notificación
+                notification.onclick = function() {
+                    window.focus();
+                    notification.close();
+                    
+                    // Si hay datos específicos, navegar a comandas
+                    if (data.type === 'comanda') {
+                        if (window.showComandasView) {
+                            window.showComandasView();
+                        }
+                    }
+                };
+
+                // Auto-cerrar después de 10 segundos
+                setTimeout(() => {
+                    notification.close();
+                }, 10000);
+            }
+        }
+
+        // Función para reproducir sonido de notificación
+        function playNotificationSound() {
+            try {
+                // Crear audio desde data URI
+                const audioData = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjuBzvLZizEIHm7A7+OZURE=';
+                const audio = new Audio(audioData);
+                audio.volume = 0.7;
+                audio.play().catch(e => console.log('No se pudo reproducir sonido:', e));
+            } catch (error) {
+                console.log('Error al reproducir sonido:', error);
+            }
+        }
+
+        // Función para inicializar notificaciones push
+        async function initializePushNotifications() {
+            console.log('Inicializando notificaciones push...');
+            
+            // Solicitar permisos
+            const hasPermission = await requestNotificationPermission();
+            if (!hasPermission) {
+                return false;
+            }
+
+            // Suscribirse a push
+            const subscription = await subscribeToPush();
+            if (subscription) {
+                console.log('Notificaciones push inicializadas correctamente');
+                return true;
+            }
+
+            return false;
+        }
+
+        // Escuchar mensajes del service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data.type === 'NOTIFICATION_CLICK') {
+                    if (event.data.action === 'view_comandas') {
+                        if (window.showComandasView) {
+                            window.showComandasView();
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inicializar notificaciones push cuando la app esté lista
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                initializePushNotifications();
+                setupNotificationToggle();
+            }, 2000);
+        });
+
+        // Configurar botón de toggle de notificaciones
+        function setupNotificationToggle() {
+            const toggleButton = document.getElementById('notification-toggle');
+            if (!toggleButton) return;
+
+            // Actualizar estado del botón
+            function updateToggleButton() {
+                const isEnabled = Notification.permission === 'granted';
+                const icon = toggleButton.querySelector('i');
+                if (isEnabled) {
+                    icon.className = 'fas fa-bell text-lg text-green-500';
+                    toggleButton.title = 'Desactivar notificaciones';
+                } else {
+                    icon.className = 'fas fa-bell-slash text-lg text-gray-600';
+                    toggleButton.title = 'Activar notificaciones';
+                }
+            }
+
+            // Manejar clic en el botón
+            toggleButton.addEventListener('click', async () => {
+                if (Notification.permission === 'granted') {
+                    // Desactivar notificaciones
+                    showMessage('Notificaciones desactivadas', 'info');
+                    updateToggleButton();
+                } else {
+                    // Activar notificaciones
+                    const success = await initializePushNotifications();
+                    updateToggleButton();
+                }
+            });
+
+            // Actualizar estado inicial
+            updateToggleButton();
+        }
+
+        // Función global para enviar notificación de comanda
+        window.sendComandaNotification = function(comandaData) {
+            const title = '🍽️ Nueva Comanda - HEHA';
+            const body = `Orden #${comandaData.orderNumber || 'Nueva'} - ${comandaData.dishName || 'Plato'} - Bs. ${comandaData.total || '0.00'}`;
+            const data = {
+                type: 'comanda',
+                orderId: comandaData.id,
+                orderNumber: comandaData.orderNumber,
+                total: comandaData.total
+            };
+
+            sendLocalPushNotification(title, body, data);
+        };
+    </script>
+</body>
+</html>

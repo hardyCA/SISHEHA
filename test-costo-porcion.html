@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Cálculo Automático Costo por Porción</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4">Test Cálculo Automático Costo por Porción</h1>
+        
+        <div class="space-y-6">
+            <div class="p-4 bg-green-50 rounded-lg">
+                <h2 class="font-semibold text-green-800">✅ Cálculo Automático Implementado</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ <strong>Fórmula correcta</strong> - Precio Total ÷ Porciones que Rinde</li>
+                    <li>✅ <strong>Cálculo en tiempo real</strong> - Se actualiza al escribir</li>
+                    <li>✅ <strong>Event listeners</strong> - input y change events</li>
+                    <li>✅ <strong>Validación</strong> - Solo calcula si ambos valores > 0</li>
+                    <li>✅ <strong>Campo readonly</strong> - No se puede editar manualmente</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-blue-50 rounded-lg">
+                <h2 class="font-semibold text-blue-800">Cómo Funciona</h2>
+                <ol class="text-sm space-y-1">
+                    <li>1. <strong>Usuario ingresa Precio Total</strong> - Ej: Bs. 50.00</li>
+                    <li>2. <strong>Usuario ingresa Porciones que Rinde</strong> - Ej: 10 porciones</li>
+                    <li>3. <strong>Sistema calcula automáticamente</strong> - 50 ÷ 10 = Bs. 5.00</li>
+                    <li>4. <strong>Se muestra en "Costo por Porción"</strong> - Bs. 5.00</li>
+                    <li>5. <strong>Se actualiza en tiempo real</strong> - Al cambiar cualquier valor</li>
+                </ol>
+            </div>
+            
+            <div class="p-4 bg-yellow-50 rounded-lg">
+                <h2 class="font-semibold text-yellow-800">Ejemplos de Cálculo</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                    <div class="bg-white p-3 rounded border">
+                        <h3 class="font-semibold text-blue-600">Ejemplo 1: Pollo</h3>
+                        <ul class="text-sm space-y-1">
+                            <li>• Precio Total: Bs. 30.00</li>
+                            <li>• Porciones: 6</li>
+                            <li>• <strong>Costo por Porción: Bs. 5.00</strong></li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-3 rounded border">
+                        <h3 class="font-semibold text-green-600">Ejemplo 2: Arroz</h3>
+                        <ul class="text-sm space-y-1">
+                            <li>• Precio Total: Bs. 20.00</li>
+                            <li>• Porciones: 8</li>
+                            <li>• <strong>Costo por Porción: Bs. 2.50</strong></li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-3 rounded border">
+                        <h3 class="font-semibold text-purple-600">Ejemplo 3: Papa</h3>
+                        <ul class="text-sm space-y-1">
+                            <li>• Precio Total: Bs. 15.00</li>
+                            <li>• Porciones: 12</li>
+                            <li>• <strong>Costo por Porción: Bs. 1.25</strong></li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-3 rounded border">
+                        <h3 class="font-semibold text-orange-600">Ejemplo 4: Aceite</h3>
+                        <ul class="text-sm space-y-1">
+                            <li>• Precio Total: Bs. 25.00</li>
+                            <li>• Porciones: 20</li>
+                            <li>• <strong>Costo por Porción: Bs. 1.25</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-purple-50 rounded-lg">
+                <h2 class="font-semibold text-purple-800">Mejoras Implementadas</h2>
+                <ul class="text-sm space-y-1">
+                    <li>• <strong>Event listeners múltiples</strong> - input y change events</li>
+                    <li>• <strong>Cálculo inicial</strong> - Se ejecuta al cargar la página</li>
+                    <li>• <strong>Validación robusta</strong> - Solo calcula con valores válidos</li>
+                    <li>• <strong>Timeout de seguridad</strong> - Asegura cálculo después de abrir modal</li>
+                    <li>• <strong>Valor y texto</strong> - Actualiza tanto value como textContent</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-red-50 rounded-lg">
+                <h2 class="font-semibold text-red-800">Prueba Paso a Paso</h2>
+                <ol class="text-sm space-y-1">
+                    <li>1. <strong>Abrir index.html</strong> - Recargar página</li>
+                    <li>2. <strong>Ir a "Ingredientes"</strong> - Tocar icono en bottom nav</li>
+                    <li>3. <strong>Tocar "Agregar Ingrediente"</strong> - Abrir modal</li>
+                    <li>4. <strong>Escribir Precio Total</strong> - Ej: 50</li>
+                    <li>5. <strong>Escribir Porciones</strong> - Ej: 10</li>
+                    <li>6. <strong>Verificar cálculo automático</strong> - Debería mostrar Bs. 5.00</li>
+                    <li>7. <strong>Cambiar valores</strong> - Verificar que se actualiza en tiempo real</li>
+                </ol>
+            </div>
+            
+            <div class="p-4 bg-indigo-50 rounded-lg">
+                <h2 class="font-semibold text-indigo-800">Código Implementado</h2>
+                <div class="bg-gray-100 p-3 rounded text-sm font-mono">
+                    <pre>const calculateCost = () => {
+  const price = parseFloat(priceInput.value) || 0;
+  const portions = parseInt(portionsInput.value) || 1;
+  
+  if (price > 0 && portions > 0) {
+    const costPerPortion = price / portions;
+    costDisplay.value = costPerPortion.toFixed(2);
+    costDisplay.textContent = `Bs. ${costPerPortion.toFixed(2)}`;
+  } else {
+    costDisplay.value = "0.00";
+    costDisplay.textContent = "Bs. 0.00";
+  }
+};
+
+// Event listeners
+priceInput.addEventListener("input", calculateCost);
+priceInput.addEventListener("change", calculateCost);
+portionsInput.addEventListener("input", calculateCost);
+portionsInput.addEventListener("change", calculateCost);</pre>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-orange-50 rounded-lg">
+                <h2 class="font-semibold text-orange-800">Verificación Final</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ <strong>Cálculo automático</strong> - Precio ÷ Porciones</li>
+                    <li>✅ <strong>Tiempo real</strong> - Se actualiza al escribir</li>
+                    <li>✅ <strong>Validación</strong> - Solo con valores válidos</li>
+                    <li>✅ <strong>Campo readonly</strong> - No editable manualmente</li>
+                    <li>✅ <strong>Formato correcto</strong> - Bs. X.XX</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

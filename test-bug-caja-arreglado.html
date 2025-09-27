@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Bug Caja Arreglado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4">Test Bug Caja Arreglado</h1>
+        
+        <div class="space-y-4">
+            <div class="p-4 bg-red-50 rounded-lg">
+                <h2 class="font-semibold text-red-800">Bug Identificado</h2>
+                <ul class="text-sm space-y-1">
+                    <li>❌ <strong>Bucle infinito</strong> en loadCashRegister</li>
+                    <li>❌ <strong>Condición incorrecta</strong>: if (currentCapital === 0 && currentProfit === 0)</li>
+                    <li>❌ <strong>Llamada recursiva</strong>: initializeDefaultCash() → loadCashRegister()</li>
+                    <li>❌ <strong>Resultado</strong>: Console spam infinito</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-green-50 rounded-lg">
+                <h2 class="font-semibold text-green-800">Solución Implementada</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ <strong>Condición corregida</strong>: if (cashSnapshot.empty)</li>
+                    <li>✅ <strong>Sin recursión</strong>: initializeDefaultCash() actualiza display directamente</li>
+                    <li>✅ <strong>Lógica correcta</strong>: Solo inicializa si NO hay datos</li>
+                    <li>✅ <strong>Resultado</strong>: Sin bucle infinito</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-blue-50 rounded-lg">
+                <h2 class="font-semibold text-blue-800">Cambios Realizados</h2>
+                <div class="text-xs font-mono bg-gray-100 p-2 rounded">
+                    <div><strong>Antes (BUG):</strong></div>
+                    <div>if (currentCapital === 0 && currentProfit === 0) {</div>
+                    <div>&nbsp;&nbsp;await this.initializeDefaultCash();</div>
+                    <div>}</div>
+                    <br>
+                    <div><strong>Después (ARREGLADO):</strong></div>
+                    <div>if (cashSnapshot.empty) {</div>
+                    <div>&nbsp;&nbsp;await this.initializeDefaultCash();</div>
+                    <div>}</div>
+                    <br>
+                    <div><strong>Y en initializeDefaultCash():</strong></div>
+                    <div>// Update display directly (sin llamar loadCashRegister)</div>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-yellow-50 rounded-lg">
+                <h2 class="font-semibold text-yellow-800">Prueba Final</h2>
+                <ol class="text-sm space-y-1">
+                    <li>1. <strong>Recargar index.html</strong> (F5)</li>
+                    <li>2. <strong>Abrir Console</strong> (F12)</li>
+                    <li>3. <strong>Ir a "Caja"</strong></li>
+                    <li>4. <strong>Verificar que NO hay spam</strong> en console</li>
+                    <li>5. <strong>Verificar que funciona</strong> correctamente</li>
+                </ol>
+            </div>
+            
+            <div class="p-4 bg-purple-50 rounded-lg">
+                <h2 class="font-semibold text-purple-800">Resultado Esperado</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ <strong>Console limpio</strong> - Sin bucles infinitos</li>
+                    <li>✅ <strong>Caja funciona</strong> - Capital y Ganancias en 0</li>
+                    <li>✅ <strong>Movimientos cargan</strong> - Solo del día</li>
+                    <li>✅ <strong>Sin errores</strong> - Funcionamiento normal</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

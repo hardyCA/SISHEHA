@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Caja Profesional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4">Test Caja Profesional</h1>
+        
+        <div class="space-y-4">
+            <div class="p-4 bg-green-50 rounded-lg">
+                <h2 class="font-semibold text-green-800">Estructura Profesional Implementada</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ <strong>Colección "caja"</strong> con 2 documentos fijos</li>
+                    <li>✅ <strong>Documento "Capital"</strong> con campo `monto`</li>
+                    <li>✅ <strong>Documento "Ganancia"</strong> con campo `monto`</li>
+                    <li>✅ <strong>Solo sumar/restar</strong> de esos documentos</li>
+                    <li>✅ <strong>NO crear más documentos</strong> - Profesional</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-blue-50 rounded-lg">
+                <h2 class="font-semibold text-blue-800">Estructura de Datos</h2>
+                <div class="text-xs font-mono bg-gray-100 p-2 rounded">
+                    <div><strong>Colección: "caja"</strong></div>
+                    <div>├── Documento: "Capital"</div>
+                    <div>│   └── monto: 0 (se suma/resta)</div>
+                    <div>└── Documento: "Ganancia"</div>
+                    <div>    └── monto: 0 (se suma/resta)</div>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-yellow-50 rounded-lg">
+                <h2 class="font-semibold text-yellow-800">Funcionamiento</h2>
+                <ul class="text-sm space-y-1">
+                    <li>• <strong>Ventas:</strong> Costo → Capital, Ganancia → Ganancia</li>
+                    <li>• <strong>Movimientos:</strong> Sumar/restar del documento correspondiente</li>
+                    <li>• <strong>Actualización:</strong> updateDoc() en lugar de addDoc()</li>
+                    <li>• <strong>Historial:</strong> Solo en colección "movimientos"</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-purple-50 rounded-lg">
+                <h2 class="font-semibold text-purple-800">Ventajas de esta Estructura</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ <strong>Profesional</strong> - Solo 2 documentos fijos</li>
+                    <li>✅ <strong>Eficiente</strong> - No acumula documentos</li>
+                    <li>✅ <strong>Limpio</strong> - Fácil de mantener</li>
+                    <li>✅ <strong>Escalable</strong> - No crece indefinidamente</li>
+                    <li>✅ <strong>Rápido</strong> - Actualizaciones directas</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-red-50 rounded-lg">
+                <h2 class="font-semibold text-red-800">Prueba Final</h2>
+                <ol class="text-sm space-y-1">
+                    <li>1. <strong>Recargar index.html</strong> (F5)</li>
+                    <li>2. <strong>Ir a "Caja"</strong></li>
+                    <li>3. <strong>Verificar que empieza en 0</strong></li>
+                    <li>4. <strong>Hacer una venta</strong> - Verificar actualización</li>
+                    <li>5. <strong>Crear movimiento manual</strong> - Verificar funcionamiento</li>
+                    <li>6. <strong>Verificar en Firebase</strong> - Solo 2 documentos en "caja"</li>
+                </ol>
+            </div>
+            
+            <div class="p-4 bg-indigo-50 rounded-lg">
+                <h2 class="font-semibold text-indigo-800">Ejemplo de Uso</h2>
+                <div class="text-sm space-y-1">
+                    <p><strong>Estado inicial:</strong></p>
+                    <ul class="ml-4 space-y-1">
+                        <li>• Capital: Bs. 0.00</li>
+                        <li>• Ganancia: Bs. 0.00</li>
+                    </ul>
+                    <p><strong>Después de venta (Bs. 20, costo Bs. 15):</strong></p>
+                    <ul class="ml-4 space-y-1">
+                        <li>• Capital: Bs. 15.00 (costo recuperado)</li>
+                        <li>• Ganancia: Bs. 5.00 (ganancia neta)</li>
+                    </ul>
+                    <p><strong>Después de movimiento (-Bs. 10 de Capital):</strong></p>
+                    <ul class="ml-4 space-y-1">
+                        <li>• Capital: Bs. 5.00</li>
+                        <li>• Ganancia: Bs. 5.00 (sin cambios)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejemplo Venta Bs. 20</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center text-gray-800">Ejemplo: Venta de Bs. 20.00</h1>
+        
+        <!-- Ejemplo de Venta -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-semibold mb-6 text-center text-blue-600">📋 Plato Vendido</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Plato -->
+                <div class="bg-blue-50 p-6 rounded-lg border-2 border-blue-200">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-4">🍽️ Plato</h3>
+                    <div class="space-y-2">
+                        <div><strong>Nombre:</strong> Pollo a la Plancha</div>
+                        <div><strong>Precio de Venta:</strong> Bs. 20.00</div>
+                        <div><strong>Costo de Ingredientes:</strong> Bs. 15.00</div>
+                        <div><strong>Ganancia Neta:</strong> Bs. 5.00</div>
+                    </div>
+                </div>
+                
+                <!-- Capital -->
+                <div class="bg-green-50 p-6 rounded-lg border-2 border-green-200">
+                    <h3 class="text-lg font-semibold text-green-800 mb-4">💰 Capital</h3>
+                    <div class="space-y-2">
+                        <div><strong>Antes:</strong> Bs. 1,000.00</div>
+                        <div class="text-green-600"><strong>+ Costo recuperado:</strong> Bs. 15.00</div>
+                        <div class="text-lg font-bold text-green-700"><strong>Después:</strong> Bs. 1,015.00</div>
+                    </div>
+                    <div class="mt-3 text-sm text-green-600">
+                        ✅ Se SUMA el costo porque recuperamos el dinero invertido en ingredientes
+                    </div>
+                </div>
+                
+                <!-- Ganancias -->
+                <div class="bg-yellow-50 p-6 rounded-lg border-2 border-yellow-200">
+                    <h3 class="text-lg font-semibold text-yellow-800 mb-4">📈 Ganancias</h3>
+                    <div class="space-y-2">
+                        <div><strong>Antes:</strong> Bs. 0.00</div>
+                        <div class="text-yellow-600"><strong>+ Ganancia neta:</strong> Bs. 5.00</div>
+                        <div class="text-lg font-bold text-yellow-700"><strong>Después:</strong> Bs. 5.00</div>
+                    </div>
+                    <div class="mt-3 text-sm text-yellow-600">
+                        ✅ Se SUMA la ganancia porque es el beneficio real del negocio
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flujo Detallado -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-semibold mb-6 text-center text-gray-800">🔄 Flujo Detallado</h2>
+            
+            <div class="space-y-6">
+                <!-- Paso 1 -->
+                <div class="flex items-start space-x-4 p-4 bg-blue-50 rounded-lg">
+                    <div class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">1</div>
+                    <div>
+                        <h3 class="font-semibold text-blue-800">Cliente paga por el plato</h3>
+                        <p class="text-gray-600">Cliente paga Bs. 20.00 por el Pollo a la Plancha</p>
+                    </div>
+                </div>
+                
+                <!-- Paso 2 -->
+                <div class="flex items-start space-x-4 p-4 bg-green-50 rounded-lg">
+                    <div class="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">2</div>
+                    <div>
+                        <h3 class="font-semibold text-green-800">Costo se suma al Capital</h3>
+                        <p class="text-gray-600">Bs. 15.00 (costo de ingredientes) se suma al capital porque recuperamos el dinero invertido</p>
+                    </div>
+                </div>
+                
+                <!-- Paso 3 -->
+                <div class="flex items-start space-x-4 p-4 bg-yellow-50 rounded-lg">
+                    <div class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">3</div>
+                    <div>
+                        <h3 class="font-semibold text-yellow-800">Ganancia se suma a Ganancias</h3>
+                        <p class="text-gray-600">Bs. 5.00 (ganancia neta) se suma a las ganancias</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen Matemático -->
+        <div class="bg-gradient-to-r from-green-400 to-blue-500 rounded-lg shadow-lg p-8 text-white">
+            <h2 class="text-2xl font-semibold mb-4 text-center">🧮 Resumen Matemático</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">💰 Capital (Caja)</h3>
+                    <div class="bg-white/20 rounded-lg p-4">
+                        <div class="text-sm space-y-1">
+                            <div>Capital inicial: Bs. 1,000.00</div>
+                            <div>+ Costo recuperado: Bs. 15.00</div>
+                            <div class="border-t border-white/30 pt-1 font-bold">= Capital final: Bs. 1,015.00</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">📈 Ganancias</h3>
+                    <div class="bg-white/20 rounded-lg p-4">
+                        <div class="text-sm space-y-1">
+                            <div>Ganancias iniciales: Bs. 0.00</div>
+                            <div>+ Ganancia de venta: Bs. 5.00</div>
+                            <div class="border-t border-white/30 pt-1 font-bold">= Ganancias finales: Bs. 5.00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 p-4 bg-white/20 rounded-lg">
+                <p class="text-center font-semibold">
+                    💡 <strong>Total en Caja:</strong> Bs. 1,015.00 (Capital) + Bs. 5.00 (Ganancias) = <strong>Bs. 1,020.00</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Instrucciones para Probar -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mt-8">
+            <h2 class="text-2xl font-semibold mb-6 text-center text-gray-800">🧪 Cómo Probar en el Sistema</h2>
+            
+            <div class="space-y-4">
+                <div class="p-4 bg-blue-50 rounded-lg">
+                    <h3 class="font-semibold text-blue-800 mb-2">Paso 1: Crear un Plato</h3>
+                    <p class="text-sm text-gray-600">Ve a "Platos" → "Nuevo Plato" → Crea un plato con precio Bs. 20.00 y costo Bs. 15.00</p>
+                </div>
+                
+                <div class="p-4 bg-green-50 rounded-lg">
+                    <h3 class="font-semibold text-green-800 mb-2">Paso 2: Hacer una Venta</h3>
+                    <p class="text-sm text-gray-600">Ve a "Ventas" → "Nueva Venta" → Agrega el plato y guarda la venta</p>
+                </div>
+                
+                <div class="p-4 bg-yellow-50 rounded-lg">
+                    <h3 class="font-semibold text-yellow-800 mb-2">Paso 3: Verificar en Caja</h3>
+                    <p class="text-sm text-gray-600">Ve a "Caja" → Verifica que el capital aumentó en Bs. 15.00 y las ganancias en Bs. 5.00</p>
+                </div>
+                
+                <div class="p-4 bg-purple-50 rounded-lg">
+                    <h3 class="font-semibold text-purple-800 mb-2">Paso 4: Verificar en Capital</h3>
+                    <p class="text-sm text-gray-600">Ve a "Capital" → Debe aparecer una entrada de "Recuperación de costo de ingredientes de venta + Bs. 15.00"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

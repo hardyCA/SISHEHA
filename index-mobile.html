@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Restaurante Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                        secondary: {
+                            50: '#faf5ff',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                        }
+                    },
+                    animation: {
+                        'fadeIn': 'fadeIn 0.3s ease-in-out',
+                        'slideUp': 'slideUp 0.3s ease-out',
+                        'bounceIn': 'bounceIn 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(100%)' },
+                            '100%': { transform: 'translateY(0)' },
+                        },
+                        bounceIn: {
+                            '0%': { transform: 'scale(0.3)', opacity: '0' },
+                            '50%': { transform: 'scale(1.05)' },
+                            '70%': { transform: 'scale(0.9)' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Mobile-first custom styles */
+        .mobile-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .mobile-content {
+            padding-bottom: 80px; /* Space for bottom nav */
+        }
+        
+        .fab {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            z-index: 40;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-mobile {
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-mobile {
+            min-height: 48px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .input-mobile {
+            min-height: 48px;
+            border-radius: 12px;
+            font-size: 16px; /* Prevents zoom on iOS */
+        }
+        
+        .modal-mobile {
+            border-radius: 20px 20px 0 0;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .chart-container {
+            height: 250px;
+            margin: 16px 0;
+        }
+        
+        .content-section {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        .nav-item {
+            transition: all 0.2s ease;
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        @media (min-width: 768px) {
+            .mobile-nav {
+                position: static;
+                background: transparent;
+                border-top: none;
+            }
+            
+            .mobile-content {
+                padding-bottom: 0;
+            }
+            
+            .fab {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="font-poppins bg-gray-50 min-h-screen">
+    <!-- Mobile Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+        <div class="px-4 py-3">
+            <h1 class="text-xl font-bold text-gray-800 text-center">Restaurante Manager</h1>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="mobile-content">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="content-section p-4">
+            <div class="space-y-4">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white card-mobile p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Ingredientes</p>
+                                <p class="text-2xl font-bold text-blue-600" id="total-ingredients">0</p>
+                            </div>
+                            <i class="fas fa-carrot text-2xl text-blue-500"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white card-mobile p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Platos</p>
+                                <p class="text-2xl font-bold text-purple-600" id="total-dishes">0</p>
+                            </div>
+                            <i class="fas fa-utensils text-2xl text-purple-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Sales -->
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Ventas de Hoy</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total:</span>
+                            <span class="font-semibold text-green-600" id="today-total">Bs. 0.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Ganancia:</span>
+                            <span class="font-semibold text-blue-600" id="today-profit">Bs. 0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Sales -->
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Ventas Recientes</h3>
+                    <div id="recent-sales" class="space-y-2">
+                        <p class="text-gray-500 text-center py-4">No hay ventas hoy</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ingredients Section -->
+        <section id="ingredients" class="content-section hidden p-4">
+            <div class="space-y-4">
+                <div class="bg-white card-mobile p-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Ingredientes</h2>
+                    <button id="add-ingredient-btn" class="w-full btn-mobile bg-blue-500 text-white hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Agregar Ingrediente
+                    </button>
+                </div>
+                <div id="ingredients-list" class="space-y-3">
+                    <!-- Ingredients will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Dishes Section -->
+        <section id="dishes" class="content-section hidden p-4">
+            <div class="space-y-4">
+                <div class="bg-white card-mobile p-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Platos</h2>
+                    <button id="add-dish-btn" class="w-full btn-mobile bg-purple-500 text-white hover:bg-purple-600 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Agregar Plato
+                    </button>
+                </div>
+                <div id="dishes-list" class="space-y-3">
+                    <!-- Dishes will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Sales Section -->
+        <section id="sales" class="content-section hidden p-4">
+            <div class="space-y-4">
+                <div class="bg-white card-mobile p-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Nueva Venta</h2>
+                    <button id="new-sale-btn" class="w-full btn-mobile bg-green-500 text-white hover:bg-green-600 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Nueva Venta
+                    </button>
+                </div>
+                <div id="sales-list" class="space-y-3">
+                    <!-- Sales will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Reports Section -->
+        <section id="reports" class="content-section hidden p-4">
+            <div class="space-y-4">
+                <div class="bg-white card-mobile p-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Reportes</h2>
+                    <div class="space-y-3">
+                        <input type="date" id="report-date" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none">
+                        <button id="generate-report" class="w-full btn-mobile bg-indigo-500 text-white hover:bg-indigo-600 transition-colors">
+                            <i class="fas fa-chart-bar mr-2"></i>Generar Reporte
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Period Selector -->
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Período</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button class="period-btn btn-mobile bg-blue-500 text-white" data-period="daily">Diario</button>
+                        <button class="period-btn btn-mobile bg-gray-200 text-gray-700" data-period="weekly">Semanal</button>
+                        <button class="period-btn btn-mobile bg-gray-200 text-gray-700" data-period="monthly">Mensual</button>
+                        <button class="period-btn btn-mobile bg-gray-200 text-gray-700" data-period="yearly">Anual</button>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Tendencia de Ventas</h3>
+                    <div class="chart-container">
+                        <canvas id="salesTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Platos Más Vendidos</h3>
+                    <div class="chart-container">
+                        <canvas id="topDishesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white">
+                        <div class="text-center">
+                            <p class="text-sm opacity-90">Total Ventas</p>
+                            <p class="text-xl font-bold" id="total-sales-amount">Bs. 0.00</p>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 text-white">
+                        <div class="text-center">
+                            <p class="text-sm opacity-90">Total Ganancia</p>
+                            <p class="text-xl font-bold" id="total-profit-amount">Bs. 0.00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cash Register Section -->
+        <section id="cash-register" class="content-section hidden p-4">
+            <div class="space-y-4">
+                <!-- Cash Amounts -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-white card-mobile p-4">
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600">Capital</p>
+                            <p class="text-2xl font-bold text-blue-600" id="cash-capital-amount">Bs. 0.00</p>
+                        </div>
+                    </div>
+                    <div class="bg-white card-mobile p-4">
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600">Ganancias</p>
+                            <p class="text-2xl font-bold text-green-600" id="cash-profit-amount">Bs. 0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Movement -->
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Movimiento de Caja</h3>
+                    <button id="add-cash-movement-btn" class="w-full btn-mobile bg-orange-500 text-white hover:bg-orange-600 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Agregar Movimiento
+                    </button>
+                </div>
+
+                <!-- Today's Movements -->
+                <div class="bg-white card-mobile p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Movimientos de Hoy</h3>
+                    <div id="cash-movement-history-list" class="space-y-2">
+                        <p class="text-gray-500 text-center py-4">No hay movimientos hoy</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="mobile-nav">
+        <div class="flex justify-around py-2">
+            <button class="nav-item active flex flex-col items-center py-2 px-3 rounded-lg" data-section="dashboard">
+                <i class="fas fa-chart-pie text-lg mb-1"></i>
+                <span class="text-xs">Dashboard</span>
+            </button>
+            <button class="nav-item flex flex-col items-center py-2 px-3 rounded-lg" data-section="ingredients">
+                <i class="fas fa-carrot text-lg mb-1"></i>
+                <span class="text-xs">Ingredientes</span>
+            </button>
+            <button class="nav-item flex flex-col items-center py-2 px-3 rounded-lg" data-section="dishes">
+                <i class="fas fa-utensils text-lg mb-1"></i>
+                <span class="text-xs">Platos</span>
+            </button>
+            <button class="nav-item flex flex-col items-center py-2 px-3 rounded-lg" data-section="sales">
+                <i class="fas fa-shopping-cart text-lg mb-1"></i>
+                <span class="text-xs">Ventas</span>
+            </button>
+            <button class="nav-item flex flex-col items-center py-2 px-3 rounded-lg" data-section="reports">
+                <i class="fas fa-chart-bar text-lg mb-1"></i>
+                <span class="text-xs">Reportes</span>
+            </button>
+            <button class="nav-item flex flex-col items-center py-2 px-3 rounded-lg" data-section="cash-register">
+                <i class="fas fa-cash-register text-lg mb-1"></i>
+                <span class="text-xs">Caja</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- FAB for Quick Actions -->
+    <button class="fab bg-blue-500 text-white hover:bg-blue-600 transition-colors" id="quick-action-fab">
+        <i class="fas fa-plus text-xl"></i>
+    </button>
+
+    <!-- Modals will be added here -->
+    <!-- Ingredient Modal -->
+    <div id="ingredient-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="fixed bottom-0 left-0 right-0 bg-white modal-mobile">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Agregar Ingrediente</h3>
+                    <button class="close text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form id="ingredient-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+                        <input type="text" id="ingredient-name" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Precio Total (Bs.)</label>
+                        <input type="number" id="ingredient-price" step="0.01" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Porciones que Rinde</label>
+                        <input type="number" id="ingredient-portions" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Costo por Porción (Bs.)</label>
+                        <input type="number" id="cost-per-portion" step="0.01" class="w-full input-mobile border border-gray-300 px-3 py-2 bg-gray-100" readonly>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button" id="cancel-ingredient" class="flex-1 btn-mobile bg-gray-500 text-white hover:bg-gray-600 transition-colors">Cancelar</button>
+                        <button type="submit" class="flex-1 btn-mobile bg-blue-500 text-white hover:bg-blue-600 transition-colors">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dish Modal -->
+    <div id="dish-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="fixed bottom-0 left-0 right-0 bg-white modal-mobile">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Agregar Plato</h3>
+                    <button class="close text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form id="dish-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Plato</label>
+                        <input type="text" id="dish-name" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-purple-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Precio de Venta (Bs.)</label>
+                        <input type="number" id="dish-price" step="0.01" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-purple-500 focus:outline-none" required>
+                    </div>
+                    
+                    <!-- Ingredients Section -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Ingredientes</label>
+                        <div id="dish-ingredients" class="space-y-2 mb-3">
+                            <!-- Ingredients will be added here -->
+                        </div>
+                        <div class="flex gap-2">
+                            <select id="dish-ingredient-select" class="flex-1 input-mobile border border-gray-300 px-3 py-2 focus:border-purple-500 focus:outline-none">
+                                <option value="">Seleccionar ingrediente</option>
+                            </select>
+                            <button type="button" id="add-ingredient-to-dish" class="btn-mobile bg-purple-500 text-white hover:bg-purple-600 transition-colors px-4">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button type="button" id="cancel-dish" class="flex-1 btn-mobile bg-gray-500 text-white hover:bg-gray-600 transition-colors">Cancelar</button>
+                        <button type="submit" class="flex-1 btn-mobile bg-purple-500 text-white hover:bg-purple-600 transition-colors">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sale Modal -->
+    <div id="sale-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="fixed bottom-0 left-0 right-0 bg-white modal-mobile">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Nueva Venta</h3>
+                    <button class="close text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form id="sale-form" class="space-y-4">
+                    <div class="flex gap-2">
+                        <select id="sale-dish" class="flex-1 input-mobile border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none">
+                            <option value="">Seleccionar plato</option>
+                        </select>
+                        <input type="number" id="sale-quantity" placeholder="Cant." min="1" class="w-20 input-mobile border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none" value="1">
+                        <button type="button" id="add-dish-to-sale" class="btn-mobile bg-green-500 text-white hover:bg-green-600 transition-colors px-4">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Sale Items List -->
+                    <div id="sale-items-list" class="space-y-2">
+                        <!-- Items will be added here -->
+                    </div>
+                    
+                    <!-- Total -->
+                    <div class="bg-gray-100 p-3 rounded-lg">
+                        <div class="flex justify-between text-lg font-semibold">
+                            <span>Total:</span>
+                            <span id="sale-total">Bs. 0.00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button type="button" id="cancel-sale" class="flex-1 btn-mobile bg-gray-500 text-white hover:bg-gray-600 transition-colors">Cancelar</button>
+                        <button type="submit" id="save-sale" class="flex-1 btn-mobile bg-green-500 text-white hover:bg-green-600 transition-colors">Guardar Venta</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cash Movement Modal -->
+    <div id="cash-movement-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="fixed bottom-0 left-0 right-0 bg-white modal-mobile">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Movimiento de Caja</h3>
+                    <button class="close text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form id="cash-movement-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                        <input type="text" id="movement-description" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-orange-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad (Bs.)</label>
+                        <input type="number" id="movement-amount" step="0.01" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-orange-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
+                        <select id="movement-type" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-orange-500 focus:outline-none" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="income">Entrada de Dinero</option>
+                            <option value="expense">Salida de Dinero</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Fuente</label>
+                        <select id="movement-source" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-orange-500 focus:outline-none" required>
+                            <option value="">Seleccionar fuente</option>
+                            <option value="capital">Capital</option>
+                            <option value="profit">Ganancias</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button" id="cancel-cash-movement" class="flex-1 btn-mobile bg-gray-500 text-white hover:bg-gray-600 transition-colors">Cancelar</button>
+                        <button type="submit" class="flex-1 btn-mobile bg-orange-500 text-white hover:bg-orange-600 transition-colors">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, limit, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBvQZvQZvQZvQZvQZvQZvQZvQZvQZvQZvQ",
+            authDomain: "restaurante-manager.firebaseapp.com",
+            projectId: "restaurante-manager",
+            storageBucket: "restaurante-manager.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdefghijklmnop"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase functions globally available
+        window.db = db;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.getDocs = getDocs;
+        window.doc = doc;
+        window.updateDoc = updateDoc;
+        window.deleteDoc = deleteDoc;
+        window.query = query;
+        window.where = where;
+        window.orderBy = orderBy;
+        window.onSnapshot = onSnapshot;
+        window.limit = limit;
+        window.setDoc = setDoc;
+    </script>
+
+    <!-- App Script -->
+    <script src="app.js"></script>
+</body>
+</html>
+

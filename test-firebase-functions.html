@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Firebase Functions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4">Test Firebase Functions</h1>
+        
+        <div class="space-y-4">
+            <div class="p-4 bg-red-50 rounded-lg">
+                <h2 class="font-semibold text-red-800">Error Corregido</h2>
+                <p class="text-sm text-gray-600">TypeError: window.limit is not a function</p>
+            </div>
+            
+            <div class="p-4 bg-yellow-50 rounded-lg">
+                <h2 class="font-semibold text-yellow-800">Cambios Realizados</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ Agregado 'limit' a las importaciones de Firebase</li>
+                    <li>✅ Corregido window.limit(1) → limit(1)</li>
+                    <li>✅ Corregido window.query() → query()</li>
+                    <li>✅ Corregido window.collection() → collection()</li>
+                    <li>✅ Corregido window.orderBy() → orderBy()</li>
+                    <li>✅ Corregido window.getDocs() → getDocs()</li>
+                    <li>✅ Corregido window.addDoc() → addDoc()</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-green-50 rounded-lg">
+                <h2 class="font-semibold text-green-800">Próximos Pasos</h2>
+                <ol class="text-sm space-y-1">
+                    <li>1. Recargar index.html (F5)</li>
+                    <li>2. Abrir herramientas de desarrollador (F12)</li>
+                    <li>3. Ir a la pestaña Console</li>
+                    <li>4. Hacer clic en "Caja"</li>
+                    <li>5. Verificar que no hay errores</li>
+                </ol>
+            </div>
+            
+            <div class="p-4 bg-blue-50 rounded-lg">
+                <h2 class="font-semibold text-blue-800">Resultado Esperado</h2>
+                <p class="text-sm text-gray-600">La sección de Caja debería cargar correctamente y mostrar:</p>
+                <ul class="text-xs space-y-1 mt-2">
+                    <li>• Capital Disponible: Bs. 1,000.00</li>
+                    <li>• Ganancias Disponibles: Bs. 0.00</li>
+                    <li>• Total en Caja: Bs. 1,000.00</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

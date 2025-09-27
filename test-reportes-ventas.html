@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Reportes de Ventas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4">Test Reportes de Ventas</h1>
+        
+        <div class="space-y-6">
+            <div class="p-4 bg-green-50 rounded-lg">
+                <h2 class="font-semibold text-green-800">Reportes de Ventas Implementados</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ <strong>Resumen de Ventas</strong> - Total ventas, costos, ganancias</li>
+                    <li>✅ <strong>Platos Más Vendidos</strong> - Top 5 con medallas</li>
+                    <li>✅ <strong>Detalle de Ventas</strong> - Lista completa de ventas</li>
+                    <li>✅ <strong>Filtro por fecha</strong> - Seleccionar día específico</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-blue-50 rounded-lg">
+                <h2 class="font-semibold text-blue-800">Características de los Reportes</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                    <div class="bg-white p-3 rounded border">
+                        <h3 class="font-semibold text-blue-600">Resumen de Ventas</h3>
+                        <ul class="text-sm space-y-1">
+                            <li>• Total Ventas (Bs.)</li>
+                            <li>• Total Costos (Bs.)</li>
+                            <li>• Total Ganancia (Bs.)</li>
+                            <li>• Total Items vendidos</li>
+                            <li>• Número de ventas</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-3 rounded border">
+                        <h3 class="font-semibold text-purple-600">Platos Más Vendidos</h3>
+                        <ul class="text-sm space-y-1">
+                            <li>• Top 5 platos</li>
+                            <li>• Cantidad vendida</li>
+                            <li>• Total en dinero</li>
+                            <li>• Medallas (🥇🥈🥉)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-yellow-50 rounded-lg">
+                <h2 class="font-semibold text-yellow-800">Detalle de Ventas</h2>
+                <ul class="text-sm space-y-1">
+                    <li>• <strong>ID de venta</strong> - Últimos 6 caracteres</li>
+                    <li>• <strong>Hora de venta</strong> - Formato 24h</li>
+                    <li>• <strong>Items vendidos</strong> - Lista completa</li>
+                    <li>• <strong>Total de la venta</strong> - En bolivianos</li>
+                    <li>• <strong>Costo y ganancia</strong> - Desglose detallado</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-purple-50 rounded-lg">
+                <h2 class="font-semibold text-purple-800">Compatibilidad</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ <strong>Formato nuevo</strong> - Ventas con múltiples items</li>
+                    <li>✅ <strong>Formato antiguo</strong> - Ventas con un solo plato</li>
+                    <li>✅ <strong>Filtro por fecha</strong> - Cualquier día</li>
+                    <li>✅ <strong>Diseño responsive</strong> - Móvil y desktop</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-indigo-50 rounded-lg">
+                <h2 class="font-semibold text-indigo-800">Prueba Final</h2>
+                <ol class="text-sm space-y-1">
+                    <li>1. <strong>Recargar index.html</strong> (F5)</li>
+                    <li>2. <strong>Ir a "Reportes"</strong></li>
+                    <li>3. <strong>Seleccionar fecha</strong> (hoy o día con ventas)</li>
+                    <li>4. <strong>Hacer clic en "Generar Reporte"</strong></li>
+                    <li>5. <strong>Verificar que aparecen los 3 reportes</strong></li>
+                </ol>
+            </div>
+            
+            <div class="p-4 bg-red-50 rounded-lg">
+                <h2 class="font-semibold text-red-800">Ejemplo de Uso</h2>
+                <div class="text-sm space-y-1">
+                    <p><strong>Escenario:</strong> Día con 3 ventas</p>
+                    <ul class="ml-4 space-y-1">
+                        <li>• Venta 1: Pollo (2) + Salchipapa (1) = Bs. 35</li>
+                        <li>• Venta 2: Pollo (1) = Bs. 15</li>
+                        <li>• Venta 3: Salchipapa (2) = Bs. 20</li>
+                    </ul>
+                    <p><strong>Reporte mostrará:</strong></p>
+                    <ul class="ml-4 space-y-1">
+                        <li>• Total Ventas: Bs. 70.00</li>
+                        <li>• Pollo: 3 vendidos (🥇)</li>
+                        <li>• Salchipapa: 3 vendidos (🥈)</li>
+                        <li>• 3 ventas registradas</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

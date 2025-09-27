@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Caja Debug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4">Test Caja - Debug</h1>
+        
+        <div class="space-y-4">
+            <div class="p-4 bg-blue-50 rounded-lg">
+                <h2 class="font-semibold text-blue-800">Problema Identificado</h2>
+                <p class="text-sm text-gray-600">Los montos en Caja muestran "Bs. 0.00" en lugar de los valores reales</p>
+            </div>
+            
+            <div class="p-4 bg-yellow-50 rounded-lg">
+                <h2 class="font-semibold text-yellow-800">Solución Implementada</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ Agregado logging detallado en loadCashRegister()</li>
+                    <li>✅ Función para inicializar capital y ganancias por defecto</li>
+                    <li>✅ Capital inicial: Bs. 1,000.00</li>
+                    <li>✅ Ganancias iniciales: Bs. 0.00</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-green-50 rounded-lg">
+                <h2 class="font-semibold text-green-800">Pasos para Probar</h2>
+                <ol class="text-sm space-y-1">
+                    <li>1. Recargar index.html (F5)</li>
+                    <li>2. Abrir herramientas de desarrollador (F12)</li>
+                    <li>3. Ir a la pestaña Console</li>
+                    <li>4. Hacer clic en "Caja"</li>
+                    <li>5. Revisar los mensajes en la consola</li>
+                </ol>
+            </div>
+            
+            <div class="p-4 bg-purple-50 rounded-lg">
+                <h2 class="font-semibold text-purple-800">Mensajes Esperados en Consola</h2>
+                <div class="text-xs bg-gray-100 p-2 rounded font-mono">
+                    Loading cash register data...<br>
+                    Capital snapshot: [objeto]<br>
+                    Capital docs count: 0<br>
+                    Current capital: 0<br>
+                    Profit snapshot: [objeto]<br>
+                    Profit docs count: 0<br>
+                    Current profit: 0<br>
+                    No capital or profit data found, initializing...<br>
+                    Initial capital created: Bs. 1000.00<br>
+                    Initial profit created: Bs. 0.00
+                </div>
+            </div>
+            
+            <div class="p-4 bg-red-50 rounded-lg">
+                <h2 class="font-semibold text-red-800">Si Aún No Funciona</h2>
+                <p class="text-sm text-gray-600">Revisar la consola y reportar:</p>
+                <ul class="text-xs space-y-1 mt-2">
+                    <li>• ¿Qué mensajes aparecen?</li>
+                    <li>• ¿Hay errores de Firebase?</li>
+                    <li>• ¿Se crean los datos iniciales?</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

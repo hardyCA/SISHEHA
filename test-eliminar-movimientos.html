@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Eliminar Movimientos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4">Test Eliminar Movimientos</h1>
+        
+        <div class="space-y-4">
+            <div class="p-4 bg-green-50 rounded-lg">
+                <h2 class="font-semibold text-green-800">Funcionalidad de Eliminar Movimientos</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ <strong>Botón de eliminar</strong> en cada movimiento</li>
+                    <li>✅ <strong>Confirmación</strong> antes de eliminar</li>
+                    <li>✅ <strong>Reversión automática</strong> de capital y ganancia</li>
+                    <li>✅ <strong>Actualización inmediata</strong> de todas las vistas</li>
+                    <li>✅ <strong>Solo movimientos del día</strong> se pueden eliminar</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-blue-50 rounded-lg">
+                <h2 class="font-semibold text-blue-800">Ubicación de Botones</h2>
+                <ul class="text-sm space-y-1">
+                    <li>• <strong>Sección "Caja"</strong> - En "Movimientos de Hoy"</li>
+                    <li>• <strong>Movimientos de entrada</strong> - Ingresos de dinero</li>
+                    <li>• <strong>Movimientos de salida</strong> - Gastos de dinero</li>
+                    <li>• <strong>Capital y Ganancias</strong> - Ambos tipos de fuente</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-yellow-50 rounded-lg">
+                <h2 class="font-semibold text-yellow-800">Proceso de Eliminación</h2>
+                <ol class="text-sm space-y-1">
+                    <li>1. <strong>Usuario hace clic</strong> en botón 🗑️</li>
+                    <li>2. <strong>Confirmación</strong> - "¿Estás seguro?"</li>
+                    <li>3. <strong>Elimina movimiento</strong> de Firebase</li>
+                    <li>4. <strong>Revierte efecto</strong> en capital o ganancia</li>
+                    <li>5. <strong>Actualiza vistas</strong> - Movimientos y Caja</li>
+                </ol>
+            </div>
+            
+            <div class="p-4 bg-purple-50 rounded-lg">
+                <h2 class="font-semibold text-purple-800">Ejemplo de Reversión</h2>
+                <div class="text-sm space-y-1">
+                    <p><strong>Movimiento original:</strong></p>
+                    <ul class="ml-4 space-y-1">
+                        <li>• Tipo: Salida de Dinero</li>
+                        <li>• Cantidad: Bs. 50</li>
+                        <li>• Fuente: Capital</li>
+                        <li>• Efecto: Capital - Bs. 50</li>
+                    </ul>
+                    <p><strong>Después de eliminar:</strong></p>
+                    <ul class="ml-4 space-y-1">
+                        <li>• Capital: + Bs. 50 (se revierte)</li>
+                        <li>• Movimiento: Eliminado</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-red-50 rounded-lg">
+                <h2 class="font-semibold text-red-800">Casos de Uso</h2>
+                <ul class="text-sm space-y-1">
+                    <li>• <strong>Movimiento incorrecto</strong> - Cantidad o descripción errónea</li>
+                    <li>• <strong>Fuente incorrecta</strong> - Se registró en Capital en lugar de Ganancias</li>
+                    <li>• <strong>Tipo incorrecto</strong> - Se registró como entrada en lugar de salida</li>
+                    <li>• <strong>Movimiento duplicado</strong> - Se registró dos veces por error</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-indigo-50 rounded-lg">
+                <h2 class="font-semibold text-indigo-800">Prueba Final</h2>
+                <ol class="text-sm space-y-1">
+                    <li>1. <strong>Recargar index.html</strong> (F5)</li>
+                    <li>2. <strong>Ir a "Caja"</strong></li>
+                    <li>3. <strong>Crear un movimiento</strong> para tener algo que eliminar</li>
+                    <li>4. <strong>Ver botón 🗑️</strong> en el movimiento</li>
+                    <li>5. <strong>Hacer clic en eliminar</strong> - Confirmar</li>
+                    <li>6. <strong>Verificar que se elimina</strong> y se revierte la caja</li>
+                </ol>
+            </div>
+            
+            <div class="p-4 bg-orange-50 rounded-lg">
+                <h2 class="font-semibold text-orange-800">Características de Seguridad</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ <strong>Confirmación obligatoria</strong> - No se elimina por error</li>
+                    <li>✅ <strong>Reversión exacta</strong> - Se revierte el efecto exacto</li>
+                    <li>✅ <strong>Mensaje de éxito</strong> - Confirma la eliminación</li>
+                    <li>✅ <strong>Actualización automática</strong> - Todas las vistas se actualizan</li>
+                    <li>✅ <strong>Manejo de errores</strong> - Si algo falla, muestra error</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

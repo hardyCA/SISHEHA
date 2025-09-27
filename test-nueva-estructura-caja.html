@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Nueva Estructura Caja</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4">Test Nueva Estructura Caja</h1>
+        
+        <div class="space-y-6">
+            <div class="p-4 bg-green-50 rounded-lg">
+                <h2 class="font-semibold text-green-800">Nueva Estructura Implementada</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                    <div class="bg-white p-3 rounded border">
+                        <h3 class="font-semibold text-blue-600">Colección "caja"</h3>
+                        <ul class="text-sm space-y-1">
+                            <li>• capital: 0 (puede ser negativo)</li>
+                            <li>• ganancia: 0 (puede ser negativo)</li>
+                            <li>• createdAt: timestamp</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-3 rounded border">
+                        <h3 class="font-semibold text-purple-600">Colección "movimientos"</h3>
+                        <ul class="text-sm space-y-1">
+                            <li>• type: income/expense</li>
+                            <li>• amount: cantidad</li>
+                            <li>• source: capital/profit</li>
+                            <li>• description: descripción</li>
+                            <li>• createdAt: timestamp</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-blue-50 rounded-lg">
+                <h2 class="font-semibold text-blue-800">Funcionalidad</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ <strong>Una sola colección "caja"</strong> con capital y ganancia</li>
+                    <li>✅ <strong>Los valores se suman y restan</strong> directamente</li>
+                    <li>✅ <strong>Movimientos separados</strong> en colección "movimientos"</li>
+                    <li>✅ <strong>Solo movimientos del día</strong> se muestran</li>
+                    <li>✅ <strong>Todo empieza en 0</strong> (capital y ganancia)</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-yellow-50 rounded-lg">
+                <h2 class="font-semibold text-yellow-800">Flujo de Ventas</h2>
+                <div class="text-sm space-y-1">
+                    <p><strong>Ejemplo:</strong> Venta de Bs. 20, Costo Bs. 15, Ganancia Bs. 5</p>
+                    <ul class="ml-4 space-y-1">
+                        <li>• <strong>Antes:</strong> Capital: 0, Ganancia: 0</li>
+                        <li>• <strong>Después:</strong> Capital: 15, Ganancia: 5</li>
+                        <li>• <strong>Movimiento:</strong> Se registra en "movimientos"</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-purple-50 rounded-lg">
+                <h2 class="font-semibold text-purple-800">Prueba Final</h2>
+                <ol class="text-sm space-y-1">
+                    <li>1. <strong>Recargar index.html</strong> (F5)</li>
+                    <li>2. <strong>Ir a "Caja"</strong> - Verificar que empieza en 0</li>
+                    <li>3. <strong>Hacer una venta</strong> - Verificar que se actualiza caja</li>
+                    <li>4. <strong>Crear movimiento manual</strong> - Verificar que funciona</li>
+                    <li>5. <strong>Verificar movimientos del día</strong> - Solo hoy</li>
+                </ol>
+            </div>
+            
+            <div class="p-4 bg-red-50 rounded-lg">
+                <h2 class="font-semibold text-red-800">Estructura de Datos</h2>
+                <div class="text-xs font-mono bg-gray-100 p-2 rounded">
+                    <div><strong>Colección "caja":</strong></div>
+                    <div>{</div>
+                    <div>&nbsp;&nbsp;capital: 0,</div>
+                    <div>&nbsp;&nbsp;ganancia: 0,</div>
+                    <div>&nbsp;&nbsp;createdAt: timestamp</div>
+                    <div>}</div>
+                    <br>
+                    <div><strong>Colección "movimientos":</strong></div>
+                    <div>{</div>
+                    <div>&nbsp;&nbsp;type: "income" | "expense",</div>
+                    <div>&nbsp;&nbsp;amount: 100.00,</div>
+                    <div>&nbsp;&nbsp;source: "capital" | "profit",</div>
+                    <div>&nbsp;&nbsp;description: "Descripción",</div>
+                    <div>&nbsp;&nbsp;createdAt: timestamp</div>
+                    <div>}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,41 @@
+# Reglas de Firestore para el Sistema de Restaurante
+# Copia estas reglas en Firebase Console > Firestore Database > Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Permitir lectura y escritura a todas las colecciones para uso personal
+    // IMPORTANTE: Estas reglas son para uso personal únicamente
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+
+# Instrucciones para aplicar las reglas:
+# 1. Ve a https://console.firebase.google.com/
+# 2. Selecciona tu proyecto "he-ha-4a4d0"
+# 3. En el menú lateral, haz clic en "Firestore Database"
+# 4. Haz clic en la pestaña "Rules"
+# 5. Reemplaza todo el contenido con las reglas de arriba
+# 6. Haz clic en "Publish"
+
+# Si las reglas no funcionan, también puedes probar con:
+# rules_version = '2';
+# service cloud.firestore {
+#   match /databases/{database}/documents {
+#     match /ingredients/{document} {
+#       allow read, write: if true;
+#     }
+#     match /dishes/{document} {
+#       allow read, write: if true;
+#     }
+#     match /sales/{document} {
+#       allow read, write: if true;
+#     }
+#     match /capital/{document} {
+#       allow read, write: if true;
+#     }
+#   }
+# }
+

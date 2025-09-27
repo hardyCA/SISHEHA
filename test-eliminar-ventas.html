@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Eliminar Ventas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4">Test Eliminar Ventas</h1>
+        
+        <div class="space-y-4">
+            <div class="p-4 bg-green-50 rounded-lg">
+                <h2 class="font-semibold text-green-800">Funcionalidad de Eliminar Ventas</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ <strong>Botón de eliminar</strong> en cada venta</li>
+                    <li>✅ <strong>Confirmación</strong> antes de eliminar</li>
+                    <li>✅ <strong>Reversión automática</strong> de capital y ganancia</li>
+                    <li>✅ <strong>Actualización inmediata</strong> de todas las vistas</li>
+                    <li>✅ <strong>Funciona en todas las secciones</strong></li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-blue-50 rounded-lg">
+                <h2 class="font-semibold text-blue-800">Ubicaciones de Botones</h2>
+                <ul class="text-sm space-y-1">
+                    <li>• <strong>Ventas de Hoy</strong> - En la sección "Ventas"</li>
+                    <li>• <strong>Reportes</strong> - En "Detalle de Ventas"</li>
+                    <li>• <strong>Formato nuevo</strong> - Ventas con múltiples items</li>
+                    <li>• <strong>Formato antiguo</strong> - Ventas con un solo plato</li>
+                </ul>
+            </div>
+            
+            <div class="p-4 bg-yellow-50 rounded-lg">
+                <h2 class="font-semibold text-yellow-800">Proceso de Eliminación</h2>
+                <ol class="text-sm space-y-1">
+                    <li>1. <strong>Usuario hace clic</strong> en botón 🗑️</li>
+                    <li>2. <strong>Confirmación</strong> - "¿Estás seguro?"</li>
+                    <li>3. <strong>Elimina venta</strong> de Firebase</li>
+                    <li>4. <strong>Revierte capital</strong> - Resta costo</li>
+                    <li>5. <strong>Revierte ganancia</strong> - Resta ganancia</li>
+                    <li>6. <strong>Actualiza vistas</strong> - Ventas, Dashboard, Caja</li>
+                </ol>
+            </div>
+            
+            <div class="p-4 bg-purple-50 rounded-lg">
+                <h2 class="font-semibold text-purple-800">Ejemplo de Reversión</h2>
+                <div class="text-sm space-y-1">
+                    <p><strong>Estado antes de eliminar venta:</strong></p>
+                    <ul class="ml-4 space-y-1">
+                        <li>• Capital: Bs. 15.00</li>
+                        <li>• Ganancia: Bs. 5.00</li>
+                        <li>• Venta: Bs. 20 (costo Bs. 15, ganancia Bs. 5)</li>
+                    </ul>
+                    <p><strong>Después de eliminar la venta:</strong></p>
+                    <ul class="ml-4 space-y-1">
+                        <li>• Capital: Bs. 0.00 (15 - 15)</li>
+                        <li>• Ganancia: Bs. 0.00 (5 - 5)</li>
+                        <li>• Venta: Eliminada</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-red-50 rounded-lg">
+                <h2 class="font-semibold text-red-800">Prueba Final</h2>
+                <ol class="text-sm space-y-1">
+                    <li>1. <strong>Recargar index.html</strong> (F5)</li>
+                    <li>2. <strong>Hacer una venta</strong> para tener algo que eliminar</li>
+                    <li>3. <strong>Ir a "Ventas"</strong> - Ver botón 🗑️</li>
+                    <li>4. <strong>Hacer clic en eliminar</strong> - Confirmar</li>
+                    <li>5. <strong>Verificar que se elimina</strong> y se revierte caja</li>
+                    <li>6. <strong>Probar en "Reportes"</strong> también</li>
+                </ol>
+            </div>
+            
+            <div class="p-4 bg-indigo-50 rounded-lg">
+                <h2 class="font-semibold text-indigo-800">Características de Seguridad</h2>
+                <ul class="text-sm space-y-1">
+                    <li>✅ <strong>Confirmación obligatoria</strong> - No se elimina por error</li>
+                    <li>✅ <strong>Reversión completa</strong> - Capital y ganancia se ajustan</li>
+                    <li>✅ <strong>Mensaje de éxito</strong> - Confirma la eliminación</li>
+                    <li>✅ <strong>Actualización automática</strong> - Todas las vistas se actualizan</li>
+                    <li>✅ <strong>Manejo de errores</strong> - Si algo falla, muestra error</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
