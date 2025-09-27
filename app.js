@@ -25,6 +25,9 @@ class RestaurantManager {
     await this.loadData();
     this.updateDashboard();
 
+    // Initialize real-time listeners
+    this.setupRealtimeListeners();
+
     // Initialize comandas view if it's the default view
     setTimeout(() => {
       const comandasView = document.getElementById("comandas-view");
@@ -34,6 +37,159 @@ class RestaurantManager {
         }
       }
     }, 1000);
+  }
+
+  // Setup real-time listeners for multi-device synchronization
+  setupRealtimeListeners() {
+    console.log("Setting up real-time listeners for multi-device sync...");
+
+    // Real-time listener for sales
+    this.salesUnsubscribe = window.onSnapshot(
+      window.collection(this.db, "sales"),
+      (snapshot) => {
+        console.log("Real-time sales update received:", snapshot.size, "sales");
+
+        const newSales = [];
+        snapshot.forEach((doc) => {
+          newSales.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Update sales data
+        this.sales = newSales;
+
+        // Update all views
+        this.loadTodaySales();
+        this.updateDashboard();
+        this.updateComandasRealTime();
+
+        // Show notification for new sales (but not on initial load)
+        if (
+          this.sales.length > 0 &&
+          this.lastSalesCount !== undefined &&
+          this.sales.length > this.lastSalesCount
+        ) {
+          this.showRealtimeNotification(
+            "Nueva venta registrada en otro dispositivo"
+          );
+        }
+
+        this.lastSalesCount = this.sales.length;
+      },
+      (error) => {
+        console.error("Error in real-time sales listener:", error);
+      }
+    );
+
+    // Real-time listener for ingredients
+    this.ingredientsUnsubscribe = window.onSnapshot(
+      window.collection(this.db, "ingredients"),
+      (snapshot) => {
+        console.log(
+          "Real-time ingredients update received:",
+          snapshot.size,
+          "ingredients"
+        );
+
+        const newIngredients = [];
+        snapshot.forEach((doc) => {
+          newIngredients.push({ id: doc.id, ...doc.data() });
+        });
+
+        this.ingredients = newIngredients;
+        this.updateDashboard();
+      },
+      (error) => {
+        console.error("Error in real-time ingredients listener:", error);
+      }
+    );
+
+    // Real-time listener for dishes
+    this.dishesUnsubscribe = window.onSnapshot(
+      window.collection(this.db, "dishes"),
+      (snapshot) => {
+        console.log(
+          "Real-time dishes update received:",
+          snapshot.size,
+          "dishes"
+        );
+
+        const newDishes = [];
+        snapshot.forEach((doc) => {
+          newDishes.push({ id: doc.id, ...doc.data() });
+        });
+
+        this.dishes = newDishes;
+        this.updateDashboard();
+      },
+      (error) => {
+        console.error("Error in real-time dishes listener:", error);
+      }
+    );
+
+    // Real-time listener for cash movements
+    this.cashMovementsUnsubscribe = window.onSnapshot(
+      window.collection(this.db, "cashMovements"),
+      (snapshot) => {
+        console.log(
+          "Real-time cash movements update received:",
+          snapshot.size,
+          "movements"
+        );
+
+        const newCashMovements = [];
+        snapshot.forEach((doc) => {
+          newCashMovements.push({ id: doc.id, ...doc.data() });
+        });
+
+        this.cashMovements = newCashMovements;
+        this.updateDashboard();
+      },
+      (error) => {
+        console.error("Error in real-time cash movements listener:", error);
+      }
+    );
+
+    console.log("Real-time listeners setup complete");
+  }
+
+  // Show notification for real-time updates from other devices
+  showRealtimeNotification(message) {
+    const notification = document.createElement("div");
+    notification.className =
+      "fixed top-4 right-4 z-50 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse";
+    notification.innerHTML = `
+      <div class="flex items-center">
+        <i class="fas fa-sync-alt mr-2"></i>
+        <span class="font-semibold">${message}</span>
+      </div>
+    `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 4000);
+  }
+
+  // Cleanup listeners when needed
+  cleanupRealtimeListeners() {
+    if (this.salesUnsubscribe) {
+      this.salesUnsubscribe();
+      console.log("Sales listener unsubscribed");
+    }
+    if (this.ingredientsUnsubscribe) {
+      this.ingredientsUnsubscribe();
+      console.log("Ingredients listener unsubscribed");
+    }
+    if (this.dishesUnsubscribe) {
+      this.dishesUnsubscribe();
+      console.log("Dishes listener unsubscribed");
+    }
+    if (this.cashMovementsUnsubscribe) {
+      this.cashMovementsUnsubscribe();
+      console.log("Cash movements listener unsubscribed");
+    }
   }
 
   async testFirebaseConnection() {
@@ -354,7 +510,10 @@ class RestaurantManager {
         this.showDishModal();
         break;
       case "sales":
-        this.showSalesForm();
+        this.loadSales().then(() => {
+          this.loadTodaySales();
+          this.loadDishesForSale();
+        });
         break;
       case "cash-register":
         this.showCashMovementForm();
@@ -463,6 +622,8 @@ class RestaurantManager {
 
   async loadData() {
     try {
+      console.log("Loading initial data...");
+
       // Load ingredients first, then dishes (dishes need ingredients for cost calculation)
       await this.loadIngredients();
       await this.loadDishes();
@@ -470,6 +631,10 @@ class RestaurantManager {
       // Load other data in parallel
       await this.loadSales();
       this.updateDashboard();
+
+      console.log(
+        "Initial data loaded. Real-time listeners will handle updates."
+      );
     } catch (error) {
       console.error("Error loading data:", error);
       this.showMessage("Error al cargar los datos", "error");
@@ -2414,8 +2579,9 @@ class RestaurantManager {
   }
 
   loadTodaySales() {
-    console.log("Loading today sales...");
+    console.log("=== LOADING TODAY SALES ===");
     console.log("Total sales:", this.sales.length);
+    console.log("Sales data:", this.sales);
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -2431,35 +2597,68 @@ class RestaurantManager {
     console.log("Today sales found:", todaySales.length);
 
     const container = document.getElementById("today-sales-list");
+    console.log("Container found:", !!container);
 
     if (todaySales.length === 0) {
-      container.innerHTML = `
-        <div class="text-center py-8">
-          <i class="fas fa-shopping-cart text-4xl text-gray-300 mb-4"></i>
-          <p class="text-gray-500">No hay ventas registradas hoy</p>
-        </div>
-      `;
+      if (container) {
+        container.innerHTML = `
+          <div class="text-center py-8">
+            <i class="fas fa-shopping-cart text-4xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500">No hay ventas registradas hoy</p>
+          </div>
+        `;
+      }
       return;
     }
 
-    container.innerHTML = todaySales
-      .map((sale) => {
-        const saleTime = sale.createdAt.toDate
-          ? sale.createdAt.toDate()
-          : new Date(sale.createdAt);
-        const timeString = saleTime.toLocaleTimeString("es-BO", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+    try {
+      // Sort sales by creation time (most recent first)
+      const sortedSales = todaySales.sort((a, b) => {
+        const dateA = a.createdAt.toDate
+          ? a.createdAt.toDate()
+          : new Date(a.createdAt);
+        const dateB = b.createdAt.toDate
+          ? b.createdAt.toDate()
+          : new Date(b.createdAt);
+        return dateB.getTime() - dateA.getTime(); // Most recent first
+      });
 
-        // Handle both old format (single dish) and new format (multiple dishes)
-        if (sale.items && sale.items.length > 0) {
-          // New format: multiple dishes
-          const itemsList = sale.items
-            .map((item) => `${item.dishName} (${item.quantity})`)
-            .join(", ");
+      console.log("Sorted sales:", sortedSales.length);
 
-          return `
+      if (container) {
+        container.innerHTML = sortedSales
+          .map((sale) => {
+            const saleTime = sale.createdAt.toDate
+              ? sale.createdAt.toDate()
+              : new Date(sale.createdAt);
+            const timeString = saleTime.toLocaleTimeString("es-BO", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+
+            // Handle both old format (single dish) and new format (multiple dishes)
+            if (sale.items && sale.items.length > 0) {
+              // New format: multiple dishes
+              const itemsList = sale.items
+                .map((item) => `${item.dishName} (${item.quantity})`)
+                .join(", ");
+
+              // Calculate totals for this sale
+              const totalAmount =
+                sale.totalAmount ||
+                sale.items.reduce(
+                  (sum, item) => sum + item.price * item.quantity,
+                  0
+                );
+              const totalCost =
+                sale.totalCost ||
+                sale.items.reduce(
+                  (sum, item) => sum + item.cost * item.quantity,
+                  0
+                );
+              const totalProfit = sale.totalProfit || totalAmount - totalCost;
+
+              return `
             <div class="p-4 mb-3 bg-blue-50 rounded-xl border border-blue-200">
               <div class="flex justify-between items-start mb-2">
                 <div class="flex-1">
@@ -2467,12 +2666,17 @@ class RestaurantManager {
                     -6
                   )}</h4>
                   <p class="text-sm text-gray-600">${timeString} | ${
-            sale.itemCount
-          } platos</p>
+                sale.itemCount || sale.items.length
+              } platos</p>
                 </div>
                 <div class="flex items-center gap-3">
-                  <div class="text-lg font-bold text-green-600">
-                    Bs. ${sale.totalAmount.toFixed(2)}
+                  <div class="text-right">
+                    <div class="text-lg font-bold text-green-600">
+                      Bs. ${totalAmount.toFixed(2)}
+                    </div>
+                    <div class="text-xs text-gray-500">
+                      Ganancia: Bs. ${totalProfit.toFixed(2)}
+                    </div>
                   </div>
                   <button onclick="restaurantManager.deleteSale('${sale.id}')" 
                           class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200">
@@ -2483,32 +2687,211 @@ class RestaurantManager {
               <div class="text-sm text-gray-600">
                 <strong>Platos:</strong> ${itemsList}
               </div>
-            </div>
-          `;
-        } else {
-          // Old format: single dish (backward compatibility)
-          return `
-            <div class="flex justify-between items-center p-4 mb-2 bg-blue-50 rounded-xl border border-blue-200">
-              <div class="flex-1">
-                <h4 class="font-semibold text-gray-800">${sale.dishName}</h4>
-                <p class="text-sm text-gray-600">Cantidad: ${
-                  sale.quantity
-                } | ${timeString}</p>
-              </div>
-              <div class="flex items-center gap-3">
-                <div class="text-lg font-bold text-green-600">
-                  Bs. ${(sale.price * sale.quantity).toFixed(2)}
+              <div class="mt-2 pt-2 border-t border-blue-200">
+                <div class="flex justify-between text-xs text-gray-500">
+                  <span>Capital: Bs. ${totalCost.toFixed(2)}</span>
+                  <span>Margen: ${
+                    totalAmount > 0
+                      ? ((totalProfit / totalAmount) * 100).toFixed(1)
+                      : 0
+                  }%</span>
                 </div>
-                <button onclick="restaurantManager.deleteSale('${sale.id}')" 
-                        class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200">
-                  <i class="fas fa-trash"></i>
-                </button>
               </div>
             </div>
           `;
-        }
-      })
-      .join("");
+            } else {
+              // Old format: single dish (backward compatibility)
+              const totalAmount = sale.price * sale.quantity;
+              const totalCost = sale.cost * sale.quantity;
+              const totalProfit = totalAmount - totalCost;
+
+              return `
+            <div class="p-4 mb-3 bg-blue-50 rounded-xl border border-blue-200">
+              <div class="flex justify-between items-start mb-2">
+                <div class="flex-1">
+                  <h4 class="font-semibold text-gray-800">Venta #${sale.id.slice(
+                    -6
+                  )}</h4>
+                  <p class="text-sm text-gray-600">${timeString} | ${
+                sale.quantity
+              } platos</p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="text-right">
+                    <div class="text-lg font-bold text-green-600">
+                      Bs. ${totalAmount.toFixed(2)}
+                    </div>
+                    <div class="text-xs text-gray-500">
+                      Ganancia: Bs. ${totalProfit.toFixed(2)}
+                    </div>
+                  </div>
+                  <button onclick="restaurantManager.deleteSale('${sale.id}')" 
+                          class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="text-sm text-gray-600">
+                <strong>Plato:</strong> ${sale.dishName}
+              </div>
+              <div class="mt-2 pt-2 border-t border-blue-200">
+                <div class="flex justify-between text-xs text-gray-500">
+                  <span>Capital: Bs. ${totalCost.toFixed(2)}</span>
+                  <span>Margen: ${
+                    totalAmount > 0
+                      ? ((totalProfit / totalAmount) * 100).toFixed(1)
+                      : 0
+                  }%</span>
+                </div>
+              </div>
+            </div>
+          `;
+            }
+          })
+          .join("");
+      } else {
+        console.error("Container not found!");
+      }
+    } catch (error) {
+      console.error("Error rendering sales:", error);
+    }
+
+    // Update daily financial summary
+    console.log("=== CALLING UPDATE DAILY FINANCIAL SUMMARY ===");
+    console.log("Today sales to process:", todaySales);
+    this.updateDailyFinancialSummary(todaySales);
+  }
+
+  // Update daily financial summary
+  updateDailyFinancialSummary(todaySales) {
+    console.log("Updating daily financial summary...");
+    console.log("Today sales data:", todaySales);
+
+    // Calculate totals
+    let totalSales = 0;
+    let totalCapital = 0;
+    let totalProfit = 0;
+
+    todaySales.forEach((sale) => {
+      console.log("Processing sale:", sale);
+
+      // Total sales amount - handle different data structures
+      let saleAmount = 0;
+      if (sale.totalAmount) {
+        saleAmount = sale.totalAmount;
+      } else if (sale.total) {
+        saleAmount = sale.total;
+      } else if (sale.items && sale.items.length > 0) {
+        // New format: multiple items
+        saleAmount = sale.items.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        );
+      } else if (sale.price && sale.quantity) {
+        // Old format: single item
+        saleAmount = sale.price * sale.quantity;
+      }
+      totalSales += saleAmount;
+
+      // Total capital (cost) - handle different data structures
+      let saleCapital = 0;
+      if (sale.totalCost) {
+        saleCapital = sale.totalCost;
+      } else if (sale.cost) {
+        saleCapital = sale.cost;
+      } else if (sale.items && sale.items.length > 0) {
+        // New format: multiple items
+        saleCapital = sale.items.reduce(
+          (sum, item) => sum + item.cost * item.quantity,
+          0
+        );
+      }
+      totalCapital += saleCapital;
+
+      // Total profit
+      const saleProfit =
+        sale.totalProfit || sale.profit || saleAmount - saleCapital;
+      totalProfit += saleProfit;
+
+      console.log(
+        `Sale ${sale.id}: Amount=${saleAmount}, Capital=${saleCapital}, Profit=${saleProfit}`
+      );
+    });
+
+    // Update UI elements
+    const totalSalesEl = document.getElementById("daily-total-sales");
+    const totalCapitalEl = document.getElementById("daily-total-capital");
+    const totalProfitEl = document.getElementById("daily-total-profit");
+    const salesCountEl = document.getElementById("daily-sales-count");
+    const averageSaleEl = document.getElementById("daily-average-sale");
+
+    console.log("DOM elements found:", {
+      totalSalesEl: !!totalSalesEl,
+      totalCapitalEl: !!totalCapitalEl,
+      totalProfitEl: !!totalProfitEl,
+      salesCountEl: !!salesCountEl,
+      averageSaleEl: !!averageSaleEl,
+    });
+
+    // Check if we're in the sales section
+    const salesSection = document.getElementById("sales");
+    console.log("Sales section found:", !!salesSection);
+    console.log(
+      "Sales section visible:",
+      salesSection ? !salesSection.classList.contains("hidden") : false
+    );
+
+    if (totalSalesEl) {
+      totalSalesEl.textContent = `Bs. ${totalSales.toFixed(2)}`;
+      console.log("Updated total sales:", totalSales.toFixed(2));
+    } else {
+      console.error("Element daily-total-sales not found");
+    }
+
+    if (totalCapitalEl) {
+      totalCapitalEl.textContent = `Bs. ${totalCapital.toFixed(2)}`;
+      console.log("Updated total capital:", totalCapital.toFixed(2));
+    } else {
+      console.error("Element daily-total-capital not found");
+    }
+
+    if (totalProfitEl) {
+      totalProfitEl.textContent = `Bs. ${totalProfit.toFixed(2)}`;
+      console.log("Updated total profit:", totalProfit.toFixed(2));
+    } else {
+      console.error("Element daily-total-profit not found");
+    }
+
+    if (salesCountEl) {
+      salesCountEl.textContent = todaySales.length;
+      console.log("Updated sales count:", todaySales.length);
+    } else {
+      console.error("Element daily-sales-count not found");
+    }
+
+    if (averageSaleEl) {
+      const average =
+        todaySales.length > 0 ? totalSales / todaySales.length : 0;
+      averageSaleEl.textContent = `Bs. ${average.toFixed(2)}`;
+      console.log("Updated average sale:", average.toFixed(2));
+    } else {
+      console.error("Element daily-average-sale not found");
+    }
+
+    console.log("Daily financial summary updated:", {
+      totalSales: totalSales.toFixed(2),
+      totalCapital: totalCapital.toFixed(2),
+      totalProfit: totalProfit.toFixed(2),
+      salesCount: todaySales.length,
+    });
+  }
+
+  // Force update financial summary (for debugging)
+  forceUpdateFinancialSummary() {
+    console.log("=== FORCE UPDATING FINANCIAL SUMMARY ===");
+    this.loadSales().then(() => {
+      this.loadTodaySales();
+    });
   }
 
   async deleteSale(saleId) {
@@ -2541,12 +2924,15 @@ class RestaurantManager {
       // Subtract the amounts from cash (reverse the sale effect)
       await this.reverseCashFromSale(costAmount, profitAmount);
 
-      this.showMessage("Venta eliminada correctamente", "success");
+      this.showMessage("Venta y comanda eliminadas correctamente", "success");
 
       // Reload data
       await this.loadSales();
       this.loadTodaySales();
       this.updateDashboard();
+
+      // Update comandas to reflect the deletion
+      this.updateComandasRealTime();
     } catch (error) {
       console.error("Error deleting sale:", error);
       this.showMessage("Error al eliminar la venta", "error");
@@ -3101,4 +3487,8 @@ class RestaurantManager {
 let restaurantManager;
 document.addEventListener("DOMContentLoaded", () => {
   restaurantManager = new RestaurantManager();
+
+  // Make debugging functions available globally
+  window.forceUpdateFinancialSummary = () =>
+    restaurantManager.forceUpdateFinancialSummary();
 });
