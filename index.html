@@ -313,22 +313,26 @@
 </head>
 <body class="font-poppins bg-gray-50 min-h-screen">
     <!-- Mobile Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-        <div class="px-4 py-3 flex items-center justify-between">
-            <h1 class="text-xl font-bold text-gray-800 flex-1 text-center">HEHA</h1>
-            <div class="flex items-center gap-3">
-                <!-- Real-time sync indicator -->
-                <div id="realtime-indicator" class="flex items-center text-green-500 cursor-pointer hover:text-green-600 transition-colors" title="Sincronización en tiempo real activa - Haz clic para ver detalles">
-                    <i class="fas fa-sync-alt text-sm animate-spin"></i>
-                    <span class="text-xs ml-1 hidden sm:inline">En vivo</span>
+        <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+            <div class="px-4 py-3 flex items-center justify-between">
+                <h1 class="text-xl font-bold text-gray-800 flex-1 text-center">HEHA</h1>
+                <div class="flex items-center gap-3">
+                    <!-- Update button -->
+                    <button id="update-app-btn" class="hidden text-blue-600 hover:text-blue-700 transition-colors duration-200" title="Actualizar aplicación">
+                        <i class="fas fa-download text-lg"></i>
+                    </button>
+                    <!-- Real-time sync indicator -->
+                    <div id="realtime-indicator" class="flex items-center text-green-500 cursor-pointer hover:text-green-600 transition-colors" title="Sincronización en tiempo real activa - Haz clic para ver detalles">
+                        <i class="fas fa-sync-alt text-sm animate-spin"></i>
+                        <span class="text-xs ml-1 hidden sm:inline">En vivo</span>
+                    </div>
+                    <!-- Notification toggle -->
+                    <button id="notification-toggle" class="text-gray-600 hover:text-green-500 transition-colors duration-200" title="Activar/Desactivar notificaciones">
+                        <i class="fas fa-bell-slash text-lg"></i>
+                    </button>
                 </div>
-                <!-- Notification toggle -->
-                <button id="notification-toggle" class="text-gray-600 hover:text-green-500 transition-colors duration-200" title="Activar/Desactivar notificaciones">
-                    <i class="fas fa-bell-slash text-lg"></i>
-                </button>
             </div>
-        </div>
-    </header>
+        </header>
 
     <!-- Main Content -->
     <main class="mobile-content">
@@ -1333,6 +1337,12 @@
                                 }
                             });
                         });
+                        
+                        // Verificar si ya hay una actualización esperando
+                        if (registration.waiting) {
+                            console.log('Actualización esperando, mostrando botón');
+                            showUpdateNotification();
+                        }
                     })
                     .catch((error) => {
                         console.log('Error al registrar Service Worker:', error);
@@ -1414,6 +1424,19 @@
 
         // Función para mostrar notificación de actualización
         function showUpdateNotification() {
+            // Mostrar botón en el header
+            const updateBtn = document.getElementById('update-app-btn');
+            if (updateBtn) {
+                updateBtn.classList.remove('hidden');
+                updateBtn.innerHTML = '<i class="fas fa-download text-lg"></i>';
+                updateBtn.title = 'Nueva versión disponible - Haz clic para actualizar';
+                updateBtn.onclick = updateApp;
+                
+                // Agregar animación de parpadeo
+                updateBtn.classList.add('animate-pulse');
+            }
+            
+            // Mostrar notificación flotante
             const notification = document.createElement('div');
             notification.className = 'fixed top-4 left-4 right-4 bg-blue-500 text-white p-4 rounded-lg shadow-lg z-50';
             notification.innerHTML = `
@@ -1442,10 +1465,32 @@
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistration().then((registration) => {
                     if (registration && registration.waiting) {
+                        // Actualizar botón del header
+                        const updateBtn = document.getElementById('update-app-btn');
+                        if (updateBtn) {
+                            updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-lg"></i>';
+                            updateBtn.title = 'Actualizando...';
+                            updateBtn.onclick = null; // Deshabilitar clics adicionales
+                        }
+                        
                         // Enviar mensaje al service worker para que se active
                         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-                        // Recargar la página
-                        window.location.reload();
+                        
+                        // Mostrar mensaje de actualización
+                        const notification = document.createElement('div');
+                        notification.className = 'fixed top-4 left-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50';
+                        notification.innerHTML = `
+                            <div class="flex items-center justify-center">
+                                <i class="fas fa-spinner fa-spin mr-2"></i>
+                                <span class="font-semibold">Actualizando aplicación...</span>
+                            </div>
+                        `;
+                        document.body.appendChild(notification);
+                        
+                        // Recargar la página después de un breve delay
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
                     }
                 });
             }
