@@ -470,17 +470,8 @@ class RestaurantManager {
     // Period buttons
     document.querySelectorAll(".period-btn").forEach((btn) => {
       btn.addEventListener("click", (e) => {
-        // Update button styles
-        document.querySelectorAll(".period-btn").forEach((b) => {
-          b.classList.remove("bg-blue-500", "text-white");
-          b.classList.add("bg-gray-200", "text-gray-700");
-        });
-        e.target.classList.remove("bg-gray-200", "text-gray-700");
-        e.target.classList.add("bg-blue-500", "text-white");
-
-        // Set current period and regenerate report
-        this.currentPeriod = e.target.dataset.period;
-        this.generateReport();
+        const period = e.target.dataset.period;
+        this.setPeriod(period);
       });
     });
 
@@ -990,16 +981,16 @@ class RestaurantManager {
                           dish.id
                         }" class="ingredients-list-collapsed">
                             <ul class="list-disc list-inside space-y-1 mt-2">
-                                ${(dish.ingredients || [])
-                                  .map(
-                                    (ing) => `
-                                    <li>${ing.name}: ${
-                                      ing.portions || ing.quantity || 0
-                                    } porciones</li>
-                                `
-                                  )
-                                  .join("")}
-                            </ul>
+                        ${(dish.ingredients || [])
+                          .map(
+                            (ing) => `
+                            <li>${ing.name}: ${
+                              ing.portions || ing.quantity || 0
+                            } porciones</li>
+                        `
+                          )
+                          .join("")}
+                    </ul>
                         </div>
                     </div>
                 </div>
@@ -1113,36 +1104,40 @@ class RestaurantManager {
       ingredientItem.className =
         "bg-white rounded-lg border border-gray-200 p-3 shadow-sm";
       ingredientItem.innerHTML = `
-        <div class="flex items-center gap-3">
-          <div class="flex-1">
-            <select name="ingredient-${index}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none text-sm" required>
-              <option value="">Seleccionar ingrediente</option>
-              ${this.ingredients
-                .map(
-                  (ingredient) => `
-                  <option value="${ingredient.id}" data-cost="${
-                    ingredient.costPerPortion ||
-                    ingredient.price / ingredient.portions
-                  }" ${ingredient.id === ing.ingredientId ? "selected" : ""}>
-                    ${ingredient.name} (Bs. ${(
-                    ingredient.costPerPortion ||
-                    ingredient.price / ingredient.portions
-                  ).toFixed(2)}/porción)
-                  </option>
-                `
-                )
-                .join("")}
-            </select>
-          </div>
-          <div class="w-20">
-            <input type="number" name="portions-${index}" placeholder="Cant." value="${
+                <div class="flex items-center gap-3">
+                    <div class="flex-1">
+                        <select name="ingredient-${index}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none text-sm" required>
+                            <option value="">Seleccionar ingrediente</option>
+                            ${this.ingredients
+                              .map(
+                                (ingredient) => `
+                                <option value="${ingredient.id}" data-cost="${
+                                  ingredient.costPerPortion ||
+                                  ingredient.price / ingredient.portions
+                                }" ${
+                                  ingredient.id === ing.ingredientId
+                                    ? "selected"
+                                    : ""
+                                }>
+                                    ${ingredient.name} (Bs. ${(
+                                  ingredient.costPerPortion ||
+                                  ingredient.price / ingredient.portions
+                                ).toFixed(2)}/porción)
+                                </option>
+                            `
+                              )
+                              .join("")}
+                        </select>
+                    </div>
+                    <div class="w-20">
+                        <input type="number" name="portions-${index}" placeholder="Cant." value="${
         ing.portions || ing.quantity || 0
       }" step="0.1" min="0" class="w-full px-2 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none text-sm text-center" required>
-          </div>
+                    </div>
           <button type="button" class="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors text-sm" onclick="this.closest('.bg-white').remove(); restaurantManager.calculateDishCost();">
-            <i class="fas fa-trash"></i>
-          </button>
-        </div>
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
       `;
 
       container.appendChild(ingredientItem);
@@ -1517,152 +1512,840 @@ class RestaurantManager {
   // Reports
   loadReports() {
     const today = new Date();
-    document.getElementById("report-date").value = today
+    const lastWeek = new Date(today);
+    lastWeek.setDate(today.getDate() - 7);
+
+    document.getElementById("report-start-date").value = lastWeek
       .toISOString()
       .split("T")[0];
+    document.getElementById("report-end-date").value = today
+      .toISOString()
+      .split("T")[0];
+
+    // Set default period to week
+    this.currentPeriod = "week";
+    this.updatePeriodButtons();
+
     this.generateReport();
   }
 
   generateReport() {
-    const selectedDate = document.getElementById("report-date").value;
-    const date = new Date(selectedDate);
-    const currentPeriod = this.currentPeriod || "daily";
+    const startDate = document.getElementById("report-start-date").value;
+    const endDate = document.getElementById("report-end-date").value;
 
-    // Filter sales based on current period
-    let filteredSales = this.getSalesForPeriod(date, currentPeriod);
+    if (!startDate || !endDate) {
+      this.showMessage("Selecciona fechas de inicio y fin", "error");
+      return;
+    }
 
-    // Calculate totals (handle both old and new sale formats)
-    const totalSales = filteredSales.reduce((sum, sale) => {
-      return sum + (sale.totalAmount || sale.total || 0);
-    }, 0);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
-    const totalCosts = filteredSales.reduce((sum, sale) => {
-      return sum + (sale.totalCost || sale.cost || 0);
-    }, 0);
+    // Set start time to beginning of day
+    start.setHours(0, 0, 0, 0);
+    // Set end time to end of day
+    end.setHours(23, 59, 59, 999);
 
-    const totalProfit = filteredSales.reduce((sum, sale) => {
-      return sum + (sale.totalProfit || sale.profit || 0);
-    }, 0);
+    // Filter sales by date range
+    const filteredSales = this.sales.filter((sale) => {
+      let saleDate;
+      if (sale.createdAt.toDate) {
+        saleDate = sale.createdAt.toDate();
+      } else if (sale.createdAt) {
+        saleDate = new Date(sale.createdAt);
+      } else {
+        return false;
+      }
 
-    const totalItems = filteredSales.reduce((sum, sale) => {
-      return sum + (sale.itemCount || sale.quantity || 1);
-    }, 0);
+      // Convert to local date string for comparison
+      const saleDateStr = saleDate.toISOString().split("T")[0];
+      const startDateStr = start.toISOString().split("T")[0];
+      const endDateStr = end.toISOString().split("T")[0];
 
-    const averageSale =
-      filteredSales.length > 0 ? totalSales / filteredSales.length : 0;
+      return saleDateStr >= startDateStr && saleDateStr <= endDateStr;
+    });
 
-    // Update summary cards
-    document.getElementById(
-      "total-sales-amount"
-    ).textContent = `Bs. ${totalSales.toFixed(2)}`;
-    document.getElementById(
-      "total-profit-amount"
-    ).textContent = `Bs. ${totalProfit.toFixed(2)}`;
-    document.getElementById("total-items-count").textContent = totalItems;
-    document.getElementById(
-      "average-sale-amount"
-    ).textContent = `Bs. ${averageSale.toFixed(2)}`;
+    console.log(
+      `Generating report for ${filteredSales.length} sales from ${startDate} to ${endDate}`
+    );
+    console.log("Date range:", start.toISOString(), "to", end.toISOString());
+    console.log("Start date string:", start.toISOString().split("T")[0]);
+    console.log("End date string:", end.toISOString().split("T")[0]);
+    console.log("Filtered sales:", filteredSales);
 
-    // Create charts
-    this.createSalesTrendChart(filteredSales, currentPeriod);
+    // Show message if no sales found
+    if (filteredSales.length === 0) {
+      const period = this.currentPeriod || "período";
+      const periodText =
+        {
+          day: "día",
+          week: "semana",
+          month: "mes",
+          year: "año",
+        }[period] || "período";
+
+      console.log(
+        `No se encontraron ventas para el ${periodText} seleccionado`
+      );
+    }
+
+    // Generate quantity-based reports
+    this.generateTopDishesReport(filteredSales);
+    this.generateDayOfWeekReport(filteredSales);
+    this.generateSalesByDateReport(filteredSales);
+    this.generateDailyPatternReport(filteredSales);
+
+    // Generate charts
     this.createTopDishesChart(filteredSales);
     this.createDayOfWeekChart(filteredSales);
-    this.createMonthlyChart(filteredSales);
+    this.createSalesByDateChart(filteredSales);
+    this.createDailyPatternChart(filteredSales);
+  }
 
-    // Sales Detail
-    document.getElementById("sales-detail").innerHTML =
-      filteredSales.length > 0
-        ? filteredSales
-            .map((sale) => {
-              const saleTime = sale.createdAt.toDate
-                ? sale.createdAt.toDate()
-                : new Date(sale.createdAt);
-              const timeString = saleTime.toLocaleTimeString("es-BO", {
-                hour: "2-digit",
-                minute: "2-digit",
-              });
+  updatePeriodButtons() {
+    document.querySelectorAll(".period-btn").forEach((btn) => {
+      const period = btn.dataset.period;
+      if (period === this.currentPeriod) {
+        btn.classList.remove("bg-gray-200", "text-gray-700");
+        btn.classList.add("bg-blue-500", "text-white");
+      } else {
+        btn.classList.remove("bg-blue-500", "text-white");
+        btn.classList.add("bg-gray-200", "text-gray-700");
+      }
+    });
+  }
 
-              if (sale.items && Array.isArray(sale.items)) {
-                // New format
-                return `
-            <div class="bg-white rounded-lg p-4 shadow-md border border-gray-200 mb-3">
-              <div class="flex justify-between items-start mb-2">
-                <div>
-                  <h4 class="font-semibold text-gray-800">Venta #${sale.id.slice(
-                    -6
-                  )}</h4>
-                  <p class="text-sm text-gray-600">${timeString}</p>
-                </div>
-                <div class="flex items-center gap-3">
-                  <div class="text-right">
-                    <p class="font-bold text-green-600">Bs. ${sale.totalAmount.toFixed(
-                      2
-                    )}</p>
-                    <p class="text-sm text-gray-600">${sale.itemCount} items</p>
-                  </div>
-                  <button onclick="restaurantManager.deleteSale('${sale.id}')" 
-                          class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="text-sm text-gray-600">
-                <p><strong>Items:</strong> ${sale.items
-                  .map((item) => `${item.dishName} (${item.quantity})`)
-                  .join(", ")}</p>
-                <p><strong>Costo:</strong> Bs. ${sale.totalCost.toFixed(
-                  2
-                )} | <strong>Ganancia:</strong> Bs. ${sale.totalProfit.toFixed(
-                  2
-                )}</p>
-              </div>
+  setPeriod(period) {
+    this.currentPeriod = period;
+    this.updatePeriodButtons();
+
+    const today = new Date();
+    const startDate = document.getElementById("report-start-date");
+    const endDate = document.getElementById("report-end-date");
+
+    switch (period) {
+      case "day":
+        startDate.value = today.toISOString().split("T")[0];
+        endDate.value = today.toISOString().split("T")[0];
+        break;
+      case "week":
+        const lastWeek = new Date(today);
+        lastWeek.setDate(today.getDate() - 7);
+        startDate.value = lastWeek.toISOString().split("T")[0];
+        endDate.value = today.toISOString().split("T")[0];
+        break;
+      case "month":
+        const lastMonth = new Date(today);
+        lastMonth.setMonth(today.getMonth() - 1);
+        startDate.value = lastMonth.toISOString().split("T")[0];
+        endDate.value = today.toISOString().split("T")[0];
+        break;
+      case "year":
+        const lastYear = new Date(today);
+        lastYear.setFullYear(today.getFullYear() - 1);
+        startDate.value = lastYear.toISOString().split("T")[0];
+        endDate.value = today.toISOString().split("T")[0];
+        break;
+    }
+
+    this.generateReport();
+  }
+
+  // Chart functions for quantity-based reports
+  createTopDishesChart(sales) {
+    const ctx = document.getElementById("topDishesChart");
+    if (!ctx) return;
+
+    // Destroy existing chart if it exists
+    if (this.topDishesChart) {
+      this.topDishesChart.destroy();
+    }
+
+    const dishCounts = {};
+    sales.forEach((sale) => {
+      if (sale.items && sale.items.length > 0) {
+        sale.items.forEach((item) => {
+          const dishName = item.dishName;
+          const quantity = item.quantity || 1;
+          dishCounts[dishName] = (dishCounts[dishName] || 0) + quantity;
+        });
+      } else {
+        const dishName = sale.dishName;
+        const quantity = sale.quantity || 1;
+        dishCounts[dishName] = (dishCounts[dishName] || 0) + quantity;
+      }
+    });
+
+    const topDishes = Object.entries(dishCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5);
+
+    this.topDishesChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: topDishes.map(([name]) => name),
+        datasets: [
+          {
+            label: "Platos Vendidos",
+            data: topDishes.map(([, quantity]) => quantity),
+            backgroundColor: "rgba(59, 130, 246, 0.8)",
+            borderColor: "rgba(59, 130, 246, 1)",
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+  }
+
+  createDayOfWeekChart(sales) {
+    const ctx = document.getElementById("dayOfWeekChart");
+    if (!ctx) return;
+
+    if (this.dayOfWeekChart) {
+      this.dayOfWeekChart.destroy();
+    }
+
+    const dayCounts = {
+      Lunes: 0,
+      Martes: 0,
+      Miércoles: 0,
+      Jueves: 0,
+      Viernes: 0,
+      Sábado: 0,
+      Domingo: 0,
+    };
+
+    const dayNames = [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
+    ];
+
+    // If current period is week, only count sales from current week
+    if (this.currentPeriod === "week") {
+      const today = new Date();
+      const currentDayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+      // Calculate start of current week (Monday)
+      const startOfWeek = new Date(today);
+      const daysToMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+      startOfWeek.setDate(today.getDate() - daysToMonday);
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      // Calculate end of current week (Sunday)
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
+
+      sales.forEach((sale) => {
+        const saleDate = sale.createdAt.toDate
+          ? sale.createdAt.toDate()
+          : new Date(sale.createdAt);
+
+        // Only count sales from current week
+        if (saleDate >= startOfWeek && saleDate <= endOfWeek) {
+          const dayName = dayNames[saleDate.getDay()];
+
+          if (sale.items && sale.items.length > 0) {
+            sale.items.forEach((item) => {
+              const quantity = item.quantity || 1;
+              dayCounts[dayName] += quantity;
+            });
+          } else {
+            const quantity = sale.quantity || 1;
+            dayCounts[dayName] += quantity;
+          }
+        }
+      });
+    } else {
+      // For other periods, use all sales
+      sales.forEach((sale) => {
+        const saleDate = sale.createdAt.toDate
+          ? sale.createdAt.toDate()
+          : new Date(sale.createdAt);
+        const dayName = dayNames[saleDate.getDay()];
+
+        if (sale.items && sale.items.length > 0) {
+          sale.items.forEach((item) => {
+            const quantity = item.quantity || 1;
+            dayCounts[dayName] += quantity;
+          });
+        } else {
+          const quantity = sale.quantity || 1;
+          dayCounts[dayName] += quantity;
+        }
+      });
+    }
+
+    // Keep the natural order of days of the week
+    const dayOrder = [
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
+      "Domingo",
+    ];
+    const orderedDays = dayOrder.map((day) => [day, dayCounts[day]]);
+
+    this.dayOfWeekChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: orderedDays.map(([day]) => day),
+        datasets: [
+          {
+            label: "Platos Vendidos",
+            data: orderedDays.map(([, count]) => count),
+            backgroundColor: "rgba(16, 185, 129, 0.8)",
+            borderColor: "rgba(16, 185, 129, 1)",
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+  }
+
+  createSalesByDateChart(sales) {
+    const ctx = document.getElementById("salesByDateChart");
+    if (!ctx) return;
+
+    if (this.salesByDateChart) {
+      this.salesByDateChart.destroy();
+    }
+
+    const dateCounts = {};
+
+    // If current period is month, show all days of current month
+    if (this.currentPeriod === "month") {
+      const today = new Date();
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+
+      // Get number of days in current month
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+      // Initialize all days of the month with 0
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentYear, currentMonth, day);
+        const dateKey = date.toISOString().split("T")[0];
+        const dateStr = date.toLocaleDateString("es-BO", {
+          day: "2-digit",
+          month: "2-digit",
+        });
+        dateCounts[dateStr] = { count: 0, date: dateKey };
+      }
+
+      // Count sales for each day
+      sales.forEach((sale) => {
+        const saleDate = sale.createdAt.toDate
+          ? sale.createdAt.toDate()
+          : new Date(sale.createdAt);
+
+        // Only count sales from current month
+        if (
+          saleDate.getMonth() === currentMonth &&
+          saleDate.getFullYear() === currentYear
+        ) {
+          const dateStr = saleDate.toLocaleDateString("es-BO", {
+            day: "2-digit",
+            month: "2-digit",
+          });
+
+          if (sale.items && sale.items.length > 0) {
+            sale.items.forEach((item) => {
+              const quantity = item.quantity || 1;
+              dateCounts[dateStr].count += quantity;
+            });
+          } else {
+            const quantity = sale.quantity || 1;
+            dateCounts[dateStr].count += quantity;
+          }
+        }
+      });
+    } else {
+      // For other periods, use original logic
+      sales.forEach((sale) => {
+        const saleDate = sale.createdAt.toDate
+          ? sale.createdAt.toDate()
+          : new Date(sale.createdAt);
+        const dateKey = saleDate.toISOString().split("T")[0];
+        const dateStr = saleDate.toLocaleDateString("es-BO", {
+          day: "2-digit",
+          month: "2-digit",
+        });
+
+        if (!dateCounts[dateStr]) {
+          dateCounts[dateStr] = { count: 0, date: dateKey };
+        }
+
+        if (sale.items && sale.items.length > 0) {
+          sale.items.forEach((item) => {
+            const quantity = item.quantity || 1;
+            dateCounts[dateStr].count += quantity;
+          });
+        } else {
+          const quantity = sale.quantity || 1;
+          dateCounts[dateStr].count += quantity;
+        }
+      });
+    }
+
+    const sortedDates = Object.entries(dateCounts)
+      .sort(([, a], [, b]) => new Date(b.date) - new Date(a.date))
+      .slice(0, 31); // Show up to 31 days for month view
+
+    this.salesByDateChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: sortedDates.map(([dateStr]) => dateStr),
+        datasets: [
+          {
+            label: "Platos Vendidos",
+            data: sortedDates.map(([, data]) => data.count),
+            borderColor: "rgba(139, 92, 246, 1)",
+            backgroundColor: "rgba(139, 92, 246, 0.1)",
+            tension: 0.4,
+            fill: true,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+  }
+
+  createDailyPatternChart(sales) {
+    const ctx = document.getElementById("dailyPatternChart");
+    if (!ctx) return;
+
+    if (this.dailyPatternChart) {
+      this.dailyPatternChart.destroy();
+    }
+
+    const hourCounts = {};
+    for (let i = 0; i < 24; i++) {
+      hourCounts[i] = 0;
+    }
+
+    sales.forEach((sale) => {
+      const saleDate = sale.createdAt.toDate
+        ? sale.createdAt.toDate()
+        : new Date(sale.createdAt);
+      const hour = saleDate.getHours();
+
+      if (sale.items && sale.items.length > 0) {
+        sale.items.forEach((item) => {
+          const quantity = item.quantity || 1;
+          hourCounts[hour] += quantity;
+        });
+      } else {
+        const quantity = sale.quantity || 1;
+        hourCounts[hour] += quantity;
+      }
+    });
+
+    const sortedHours = Object.entries(hourCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 8);
+
+    this.dailyPatternChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: sortedHours.map(([hour]) => `${hour.padStart(2, "0")}:00`),
+        datasets: [
+          {
+            label: "Platos Vendidos",
+            data: sortedHours.map(([, count]) => count),
+            backgroundColor: "rgba(245, 158, 11, 0.8)",
+            borderColor: "rgba(245, 158, 11, 1)",
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+  }
+
+  // New quantity-based report functions
+  generateTopDishesReport(sales) {
+    const dishCounts = {};
+
+    sales.forEach((sale) => {
+      if (sale.items && sale.items.length > 0) {
+        // New format: multiple items
+        sale.items.forEach((item) => {
+          const dishName = item.dishName;
+          const quantity = item.quantity || 1;
+          dishCounts[dishName] = (dishCounts[dishName] || 0) + quantity;
+        });
+      } else {
+        // Old format: single dish
+        const dishName = sale.dishName;
+        const quantity = sale.quantity || 1;
+        dishCounts[dishName] = (dishCounts[dishName] || 0) + quantity;
+      }
+    });
+
+    // Sort by quantity - show ALL dishes, not just top 10
+    const sortedDishes = Object.entries(dishCounts).sort(
+      ([, a], [, b]) => b - a
+    );
+
+    const container = document.getElementById("top-dishes-list");
+    if (sortedDishes.length === 0) {
+      const period = this.currentPeriod || "período";
+      container.innerHTML = `<p class="text-gray-500 text-center py-4">No hay ventas en el ${period} seleccionado</p>`;
+      return;
+    }
+
+    container.innerHTML = sortedDishes
+      .map(
+        ([dishName, quantity], index) => `
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
+              ${index + 1}
             </div>
-          `;
-              } else {
-                // Old format
-                return `
-            <div class="bg-white rounded-lg p-4 shadow-md border border-gray-200 mb-3">
-              <div class="flex justify-between items-start mb-2">
-                <div>
-                  <h4 class="font-semibold text-gray-800">${
-                    sale.dishName || "Plato"
-                  }</h4>
-                  <p class="text-sm text-gray-600">${timeString}</p>
-                </div>
-                <div class="flex items-center gap-3">
-                  <div class="text-right">
-                    <p class="font-bold text-green-600">Bs. ${(
-                      sale.totalAmount ||
-                      sale.total ||
-                      0
-                    ).toFixed(2)}</p>
-                    <p class="text-sm text-gray-600">Cantidad: ${
-                      sale.quantity || 1
-                    }</p>
-                  </div>
-                  <button onclick="restaurantManager.deleteSale('${sale.id}')" 
-                          class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="text-sm text-gray-600">
-                <p><strong>Costo:</strong> Bs. ${(
-                  sale.totalCost ||
-                  sale.cost ||
-                  0
-                ).toFixed(2)} | <strong>Ganancia:</strong> Bs. ${(
-                  sale.totalProfit ||
-                  sale.profit ||
-                  0
-                ).toFixed(2)}</p>
-              </div>
+            <span class="font-medium text-gray-800">${dishName}</span>
+          </div>
+          <div class="text-right">
+            <span class="text-lg font-bold text-blue-600">${quantity}</span>
+            <span class="text-sm text-gray-500 ml-1">vendidos</span>
+          </div>
+        </div>
+      `
+      )
+      .join("");
+  }
+
+  generateDayOfWeekReport(sales) {
+    const dayCounts = {
+      Lunes: 0,
+      Martes: 0,
+      Miércoles: 0,
+      Jueves: 0,
+      Viernes: 0,
+      Sábado: 0,
+      Domingo: 0,
+    };
+
+    const dayNames = [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
+    ];
+
+    // If current period is week, only count sales from current week
+    if (this.currentPeriod === "week") {
+      const today = new Date();
+      const currentDayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+      // Calculate start of current week (Monday)
+      const startOfWeek = new Date(today);
+      const daysToMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+      startOfWeek.setDate(today.getDate() - daysToMonday);
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      // Calculate end of current week (Sunday)
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
+
+      sales.forEach((sale) => {
+        const saleDate = sale.createdAt.toDate
+          ? sale.createdAt.toDate()
+          : new Date(sale.createdAt);
+
+        // Only count sales from current week
+        if (saleDate >= startOfWeek && saleDate <= endOfWeek) {
+          const dayName = dayNames[saleDate.getDay()];
+
+          // Count total dishes sold, not just number of sales
+          if (sale.items && sale.items.length > 0) {
+            // New format: multiple items
+            sale.items.forEach((item) => {
+              const quantity = item.quantity || 1;
+              dayCounts[dayName] += quantity;
+            });
+          } else {
+            // Old format: single dish
+            const quantity = sale.quantity || 1;
+            dayCounts[dayName] += quantity;
+          }
+        }
+      });
+    } else {
+      // For other periods, use all sales
+      sales.forEach((sale) => {
+        const saleDate = sale.createdAt.toDate
+          ? sale.createdAt.toDate()
+          : new Date(sale.createdAt);
+        const dayName = dayNames[saleDate.getDay()];
+
+        // Count total dishes sold, not just number of sales
+        if (sale.items && sale.items.length > 0) {
+          // New format: multiple items
+          sale.items.forEach((item) => {
+            const quantity = item.quantity || 1;
+            dayCounts[dayName] += quantity;
+          });
+        } else {
+          // Old format: single dish
+          const quantity = sale.quantity || 1;
+          dayCounts[dayName] += quantity;
+        }
+      });
+    }
+
+    // Keep the natural order of days of the week
+    const dayOrder = [
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
+      "Domingo",
+    ];
+    const orderedDays = dayOrder.map((day) => [day, dayCounts[day]]);
+
+    const container = document.getElementById("day-of-week-list");
+    container.innerHTML = orderedDays
+      .map(
+        ([dayName, count]) => `
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span class="font-medium text-gray-800">${dayName}</span>
+          <div class="text-right">
+            <span class="text-lg font-bold text-green-600">${count}</span>
+            <span class="text-sm text-gray-500 ml-1">platos vendidos</span>
+          </div>
+        </div>
+      `
+      )
+      .join("");
+  }
+
+  generateSalesByDateReport(sales) {
+    const dateCounts = {};
+
+    // If current period is month, show all days of current month
+    if (this.currentPeriod === "month") {
+      const today = new Date();
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+
+      // Get number of days in current month
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+      // Initialize all days of the month with 0
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentYear, currentMonth, day);
+        const dateKey = date.toISOString().split("T")[0];
+        const dateStr = date.toLocaleDateString("es-BO", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+        dateCounts[dateStr] = { count: 0, date: dateKey };
+      }
+
+      // Count sales for each day
+      sales.forEach((sale) => {
+        const saleDate = sale.createdAt.toDate
+          ? sale.createdAt.toDate()
+          : new Date(sale.createdAt);
+
+        // Only count sales from current month
+        if (
+          saleDate.getMonth() === currentMonth &&
+          saleDate.getFullYear() === currentYear
+        ) {
+          const dateStr = saleDate.toLocaleDateString("es-BO", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          });
+
+          // Count total dishes sold, not just number of sales
+          if (sale.items && sale.items.length > 0) {
+            // New format: multiple items
+            sale.items.forEach((item) => {
+              const quantity = item.quantity || 1;
+              dateCounts[dateStr].count += quantity;
+            });
+          } else {
+            // Old format: single dish
+            const quantity = sale.quantity || 1;
+            dateCounts[dateStr].count += quantity;
+          }
+        }
+      });
+    } else {
+      // For other periods, use original logic
+      sales.forEach((sale) => {
+        const saleDate = sale.createdAt.toDate
+          ? sale.createdAt.toDate()
+          : new Date(sale.createdAt);
+        const dateKey = saleDate.toISOString().split("T")[0];
+        const dateStr = saleDate.toLocaleDateString("es-BO", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+
+        if (!dateCounts[dateStr]) {
+          dateCounts[dateStr] = { count: 0, date: dateKey };
+        }
+
+        // Count total dishes sold, not just number of sales
+        if (sale.items && sale.items.length > 0) {
+          // New format: multiple items
+          sale.items.forEach((item) => {
+            const quantity = item.quantity || 1;
+            dateCounts[dateStr].count += quantity;
+          });
+        } else {
+          // Old format: single dish
+          const quantity = sale.quantity || 1;
+          dateCounts[dateStr].count += quantity;
+        }
+      });
+    }
+
+    // Sort by date
+    const sortedDates = Object.entries(dateCounts)
+      .sort(([, a], [, b]) => new Date(b.date) - new Date(a.date))
+      .slice(0, 31); // Show up to 31 days for month view
+
+    const container = document.getElementById("sales-by-date-list");
+    if (sortedDates.length === 0) {
+      container.innerHTML =
+        '<p class="text-gray-500 text-center py-4">No hay ventas en el período seleccionado</p>';
+      return;
+    }
+
+    container.innerHTML = sortedDates
+      .map(
+        ([dateStr, data]) => `
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span class="font-medium text-gray-800">${dateStr}</span>
+          <div class="text-right">
+            <span class="text-lg font-bold text-purple-600">${data.count}</span>
+            <span class="text-sm text-gray-500 ml-1">platos vendidos</span>
+          </div>
+        </div>
+      `
+      )
+      .join("");
+  }
+
+  generateDailyPatternReport(sales) {
+    const hourCounts = {};
+
+    // Initialize all hours
+    for (let i = 0; i < 24; i++) {
+      hourCounts[i] = 0;
+    }
+
+    sales.forEach((sale) => {
+      const saleDate = sale.createdAt.toDate
+        ? sale.createdAt.toDate()
+        : new Date(sale.createdAt);
+      const hour = saleDate.getHours();
+
+      // Count total dishes sold, not just number of sales
+      if (sale.items && sale.items.length > 0) {
+        // New format: multiple items
+        sale.items.forEach((item) => {
+          const quantity = item.quantity || 1;
+          hourCounts[hour] += quantity;
+        });
+      } else {
+        // Old format: single dish
+        const quantity = sale.quantity || 1;
+        hourCounts[hour] += quantity;
+      }
+    });
+
+    // Get top 5 hours
+    const sortedHours = Object.entries(hourCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5);
+
+    const container = document.getElementById("daily-pattern-list");
+    container.innerHTML = sortedHours
+      .map(([hour, count]) => {
+        const hourStr = hour.padStart(2, "0");
+        const timeStr = `${hourStr}:00`;
+        return `
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span class="font-medium text-gray-800">${timeStr}</span>
+            <div class="text-right">
+              <span class="text-lg font-bold text-orange-600">${count}</span>
+              <span class="text-sm text-gray-500 ml-1">platos vendidos</span>
             </div>
-          `;
-              }
-            })
-            .join("")
-        : '<p class="text-gray-500 text-center py-8">No hay ventas registradas para esta fecha</p>';
+          </div>
+        `;
+      })
+      .join("");
   }
 
   // Chart Functions
@@ -1700,396 +2383,9 @@ class RestaurantManager {
     return sales;
   }
 
-  createSalesTrendChart(sales, period) {
-    const ctx = document.getElementById("salesTrendChart").getContext("2d");
+  // Chart functions removed - now using quantity-based reports only
 
-    // Destroy existing chart if it exists
-    if (this.salesTrendChart) {
-      this.salesTrendChart.destroy();
-    }
-
-    const chartData = this.getTrendChartData(sales, period);
-
-    this.salesTrendChart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: chartData.labels,
-        datasets: [
-          {
-            label: "Ventas (Bs.)",
-            data: chartData.sales,
-            borderColor: "rgb(59, 130, 246)",
-            backgroundColor: "rgba(59, 130, 246, 0.1)",
-            tension: 0.4,
-            fill: true,
-          },
-          {
-            label: "Ganancias (Bs.)",
-            data: chartData.profits,
-            borderColor: "rgb(34, 197, 94)",
-            backgroundColor: "rgba(34, 197, 94, 0.1)",
-            tension: 0.4,
-            fill: true,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: "top",
-          },
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function (value) {
-                return "Bs. " + value.toFixed(2);
-              },
-            },
-          },
-        },
-      },
-    });
-  }
-
-  createTopDishesChart(sales) {
-    const ctx = document.getElementById("topDishesChart").getContext("2d");
-
-    if (this.topDishesChart) {
-      this.topDishesChart.destroy();
-    }
-
-    const dishSales = {};
-    sales.forEach((sale) => {
-      if (sale.items && Array.isArray(sale.items)) {
-        sale.items.forEach((item) => {
-          if (!dishSales[item.dishName]) {
-            dishSales[item.dishName] = 0;
-          }
-          dishSales[item.dishName] += item.quantity;
-        });
-      } else {
-        const dishName = sale.dishName || "Plato";
-        if (!dishSales[dishName]) {
-          dishSales[dishName] = 0;
-        }
-        dishSales[dishName] += sale.quantity || 1;
-      }
-    });
-
-    const topDishes = Object.entries(dishSales)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-
-    this.topDishesChart = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        labels: topDishes.map(([name]) => name),
-        datasets: [
-          {
-            data: topDishes.map(([, quantity]) => quantity),
-            backgroundColor: [
-              "rgba(255, 99, 132, 0.8)",
-              "rgba(54, 162, 235, 0.8)",
-              "rgba(255, 205, 86, 0.8)",
-              "rgba(75, 192, 192, 0.8)",
-              "rgba(153, 102, 255, 0.8)",
-            ],
-            borderWidth: 2,
-            borderColor: "#fff",
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: "bottom",
-          },
-        },
-      },
-    });
-  }
-
-  createDayOfWeekChart(sales) {
-    const ctx = document.getElementById("dayOfWeekChart").getContext("2d");
-
-    if (this.dayOfWeekChart) {
-      this.dayOfWeekChart.destroy();
-    }
-
-    const daySales = [0, 0, 0, 0, 0, 0, 0]; // Domingo a Sábado
-    const dayNames = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-
-    sales.forEach((sale) => {
-      let saleDate;
-      if (sale.createdAt && sale.createdAt.toDate) {
-        saleDate = sale.createdAt.toDate();
-      } else if (sale.createdAt) {
-        saleDate = new Date(sale.createdAt);
-      } else {
-        return;
-      }
-
-      const dayOfWeek = saleDate.getDay();
-      const amount = sale.totalAmount || sale.total || 0;
-      daySales[dayOfWeek] += amount;
-    });
-
-    this.dayOfWeekChart = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: dayNames,
-        datasets: [
-          {
-            label: "Ventas (Bs.)",
-            data: daySales,
-            backgroundColor: "rgba(147, 51, 234, 0.8)",
-            borderColor: "rgba(147, 51, 234, 1)",
-            borderWidth: 1,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: false,
-          },
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function (value) {
-                return "Bs. " + value.toFixed(2);
-              },
-            },
-          },
-        },
-      },
-    });
-  }
-
-  createMonthlyChart(sales) {
-    const ctx = document.getElementById("monthlyChart").getContext("2d");
-
-    if (this.monthlyChart) {
-      this.monthlyChart.destroy();
-    }
-
-    const monthSales = new Array(12).fill(0);
-    const monthNames = [
-      "Ene",
-      "Feb",
-      "Mar",
-      "Abr",
-      "May",
-      "Jun",
-      "Jul",
-      "Ago",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dic",
-    ];
-
-    sales.forEach((sale) => {
-      let saleDate;
-      if (sale.createdAt && sale.createdAt.toDate) {
-        saleDate = sale.createdAt.toDate();
-      } else if (sale.createdAt) {
-        saleDate = new Date(sale.createdAt);
-      } else {
-        return;
-      }
-
-      const month = saleDate.getMonth();
-      const amount = sale.totalAmount || sale.total || 0;
-      monthSales[month] += amount;
-    });
-
-    this.monthlyChart = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: monthNames,
-        datasets: [
-          {
-            label: "Ventas (Bs.)",
-            data: monthSales,
-            backgroundColor: "rgba(16, 185, 129, 0.8)",
-            borderColor: "rgba(16, 185, 129, 1)",
-            borderWidth: 1,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: false,
-          },
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function (value) {
-                return "Bs. " + value.toFixed(2);
-              },
-            },
-          },
-        },
-      },
-    });
-  }
-
-  getTrendChartData(sales, period) {
-    const labels = [];
-    const salesData = [];
-    const profitsData = [];
-
-    switch (period) {
-      case "daily":
-        // Group by hour
-        const hourlyData = new Array(24)
-          .fill(0)
-          .map(() => ({ sales: 0, profits: 0 }));
-        sales.forEach((sale) => {
-          let saleDate;
-          if (sale.createdAt && sale.createdAt.toDate) {
-            saleDate = sale.createdAt.toDate();
-          } else if (sale.createdAt) {
-            saleDate = new Date(sale.createdAt);
-          } else {
-            return;
-          }
-
-          const hour = saleDate.getHours();
-          hourlyData[hour].sales += sale.totalAmount || sale.total || 0;
-          hourlyData[hour].profits += sale.totalProfit || sale.profit || 0;
-        });
-
-        for (let i = 0; i < 24; i++) {
-          labels.push(`${i}:00`);
-          salesData.push(hourlyData[i].sales);
-          profitsData.push(hourlyData[i].profits);
-        }
-        break;
-
-      case "weekly":
-        // Group by day of week
-        const dailyData = new Array(7)
-          .fill(0)
-          .map(() => ({ sales: 0, profits: 0 }));
-        const dayNames = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-
-        sales.forEach((sale) => {
-          let saleDate;
-          if (sale.createdAt && sale.createdAt.toDate) {
-            saleDate = sale.createdAt.toDate();
-          } else if (sale.createdAt) {
-            saleDate = new Date(sale.createdAt);
-          } else {
-            return;
-          }
-
-          const dayOfWeek = saleDate.getDay();
-          dailyData[dayOfWeek].sales += sale.totalAmount || sale.total || 0;
-          dailyData[dayOfWeek].profits += sale.totalProfit || sale.profit || 0;
-        });
-
-        dayNames.forEach((day, index) => {
-          labels.push(day);
-          salesData.push(dailyData[index].sales);
-          profitsData.push(dailyData[index].profits);
-        });
-        break;
-
-      case "monthly":
-        // Group by day of month
-        const daysInMonth = new Date(
-          new Date().getFullYear(),
-          new Date().getMonth() + 1,
-          0
-        ).getDate();
-        const monthlyData = new Array(daysInMonth)
-          .fill(0)
-          .map(() => ({ sales: 0, profits: 0 }));
-
-        sales.forEach((sale) => {
-          let saleDate;
-          if (sale.createdAt && sale.createdAt.toDate) {
-            saleDate = sale.createdAt.toDate();
-          } else if (sale.createdAt) {
-            saleDate = new Date(sale.createdAt);
-          } else {
-            return;
-          }
-
-          const dayOfMonth = saleDate.getDate() - 1;
-          if (dayOfMonth >= 0 && dayOfMonth < daysInMonth) {
-            monthlyData[dayOfMonth].sales +=
-              sale.totalAmount || sale.total || 0;
-            monthlyData[dayOfMonth].profits +=
-              sale.totalProfit || sale.profit || 0;
-          }
-        });
-
-        for (let i = 1; i <= daysInMonth; i++) {
-          labels.push(`${i}`);
-          salesData.push(monthlyData[i - 1].sales);
-          profitsData.push(monthlyData[i - 1].profits);
-        }
-        break;
-
-      case "yearly":
-        // Group by month
-        const yearlyData = new Array(12)
-          .fill(0)
-          .map(() => ({ sales: 0, profits: 0 }));
-        const monthNames = [
-          "Ene",
-          "Feb",
-          "Mar",
-          "Abr",
-          "May",
-          "Jun",
-          "Jul",
-          "Ago",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Dic",
-        ];
-
-        sales.forEach((sale) => {
-          let saleDate;
-          if (sale.createdAt && sale.createdAt.toDate) {
-            saleDate = sale.createdAt.toDate();
-          } else if (sale.createdAt) {
-            saleDate = new Date(sale.createdAt);
-          } else {
-            return;
-          }
-
-          const month = saleDate.getMonth();
-          yearlyData[month].sales += sale.totalAmount || sale.total || 0;
-          yearlyData[month].profits += sale.totalProfit || sale.profit || 0;
-        });
-
-        monthNames.forEach((month, index) => {
-          labels.push(month);
-          salesData.push(yearlyData[index].sales);
-          profitsData.push(yearlyData[index].profits);
-        });
-        break;
-    }
-
-    return { labels, sales: salesData, profits: profitsData };
-  }
+  // getTrendChartData function removed - no longer needed
 
   // Dashboard
   updateDashboard() {
@@ -2247,9 +2543,9 @@ class RestaurantManager {
               <div class="flex items-center">
                 <span class="text-sm font-bold text-purple-600 mr-2">${quantity}</span>
                 <span class="text-xs text-gray-500">vendidos</span>
+                </div>
               </div>
-            </div>
-          `
+            `
           )
           .join("");
       }
@@ -2632,11 +2928,11 @@ class RestaurantManager {
     if (todaySales.length === 0) {
       if (container) {
         container.innerHTML = `
-          <div class="text-center py-8">
-            <i class="fas fa-shopping-cart text-4xl text-gray-300 mb-4"></i>
-            <p class="text-gray-500">No hay ventas registradas hoy</p>
-          </div>
-        `;
+        <div class="text-center py-8">
+          <i class="fas fa-shopping-cart text-4xl text-gray-300 mb-4"></i>
+          <p class="text-gray-500">No hay ventas registradas hoy</p>
+        </div>
+      `;
       }
       return;
     }
@@ -2701,7 +2997,7 @@ class RestaurantManager {
                 </div>
                 <div class="flex items-center gap-3">
                   <div class="text-right">
-                    <div class="text-lg font-bold text-green-600">
+                  <div class="text-lg font-bold text-green-600">
                       Bs. ${totalAmount.toFixed(2)}
                     </div>
                     <div class="text-xs text-gray-500">
@@ -2738,27 +3034,27 @@ class RestaurantManager {
               return `
             <div class="p-4 mb-3 bg-blue-50 rounded-xl border border-blue-200">
               <div class="flex justify-between items-start mb-2">
-                <div class="flex-1">
+              <div class="flex-1">
                   <h4 class="font-semibold text-gray-800">Venta #${sale.id.slice(
                     -6
                   )}</h4>
                   <p class="text-sm text-gray-600">${timeString} | ${
                 sale.quantity
               } platos</p>
-                </div>
-                <div class="flex items-center gap-3">
+              </div>
+              <div class="flex items-center gap-3">
                   <div class="text-right">
-                    <div class="text-lg font-bold text-green-600">
+                <div class="text-lg font-bold text-green-600">
                       Bs. ${totalAmount.toFixed(2)}
                     </div>
                     <div class="text-xs text-gray-500">
                       Ganancia: Bs. ${totalProfit.toFixed(2)}
                     </div>
-                  </div>
-                  <button onclick="restaurantManager.deleteSale('${sale.id}')" 
-                          class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200">
-                    <i class="fas fa-trash"></i>
-                  </button>
+                </div>
+                <button onclick="restaurantManager.deleteSale('${sale.id}')" 
+                        class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm transition-colors duration-200">
+                  <i class="fas fa-trash"></i>
+                </button>
                 </div>
               </div>
               <div class="text-sm text-gray-600">

@@ -530,91 +530,74 @@
         <!-- Reports Section -->
         <section id="reports" class="content-section hidden p-4">
             <div class="space-y-4">
+                <!-- Report Controls -->
                 <div class="bg-white card-mobile p-4">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Reportes</h2>
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Reportes de Ventas</h2>
                     <div class="space-y-3">
-                        <input type="date" id="report-date" class="w-full input-mobile border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none">
+                        <!-- Period Selector -->
+                        <div class="grid grid-cols-4 gap-2">
+                            <button class="period-btn btn-mobile bg-blue-500 text-white" data-period="day">Día</button>
+                            <button class="period-btn btn-mobile bg-gray-200 text-gray-700" data-period="week">Semana</button>
+                            <button class="period-btn btn-mobile bg-gray-200 text-gray-700" data-period="month">Mes</button>
+                            <button class="period-btn btn-mobile bg-gray-200 text-gray-700" data-period="year">Año</button>
+                        </div>
+                        
+                        <!-- Date Range -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="date" id="report-start-date" class="input-mobile border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none">
+                            <input type="date" id="report-end-date" class="input-mobile border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none">
+                        </div>
+                        
                         <button id="generate-report" class="w-full btn-mobile bg-indigo-500 text-white hover:bg-indigo-600 transition-colors">
                             <i class="fas fa-chart-bar mr-2"></i>Generar Reporte
                         </button>
                     </div>
                 </div>
-                
-                <!-- Period Selector -->
-                <div class="bg-white card-mobile p-4">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Período</h3>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button class="period-btn btn-mobile bg-blue-500 text-white" data-period="daily">Diario</button>
-                        <button class="period-btn btn-mobile bg-gray-200 text-gray-700" data-period="weekly">Semanal</button>
-                        <button class="period-btn btn-mobile bg-gray-200 text-gray-700" data-period="monthly">Mensual</button>
-                        <button class="period-btn btn-mobile bg-gray-200 text-gray-700" data-period="yearly">Anual</button>
-                    </div>
-                </div>
 
-                <!-- Charts -->
-                <div class="bg-white card-mobile p-4">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Tendencia de Ventas</h3>
-                    <div class="chart-container">
-                        <canvas id="salesTrendChart"></canvas>
-                    </div>
-                </div>
-
+                <!-- Top Selling Dishes -->
                 <div class="bg-white card-mobile p-4">
                     <h3 class="text-lg font-semibold text-gray-800 mb-3">Platos Más Vendidos</h3>
-                    <div class="chart-container">
-                        <canvas id="topDishesChart"></canvas>
+                    <div class="mb-4">
+                        <canvas id="topDishesChart" width="400" height="200"></canvas>
+                    </div>
+                    <div id="top-dishes-list" class="space-y-2">
+                        <p class="text-gray-500 text-center py-4">Genera un reporte para ver los platos más vendidos</p>
                     </div>
                 </div>
 
+                <!-- Sales by Day of Week -->
                 <div class="bg-white card-mobile p-4">
                     <h3 class="text-lg font-semibold text-gray-800 mb-3">Ventas por Día de la Semana</h3>
-                    <div class="chart-container">
-                        <canvas id="dayOfWeekChart"></canvas>
+                    <div class="mb-4">
+                        <canvas id="dayOfWeekChart" width="400" height="200"></canvas>
+                    </div>
+                    <div id="day-of-week-list" class="space-y-2">
+                        <p class="text-gray-500 text-center py-4">Genera un reporte para ver qué días se vende más</p>
                     </div>
                 </div>
 
+                <!-- Sales by Date -->
                 <div class="bg-white card-mobile p-4">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Ventas Mensuales</h3>
-                    <div class="chart-container">
-                        <canvas id="monthlyChart"></canvas>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Ventas por Fecha</h3>
+                    <div class="mb-4">
+                        <canvas id="salesByDateChart" width="400" height="200"></canvas>
+                    </div>
+                    <div id="sales-by-date-list" class="space-y-2">
+                        <p class="text-gray-500 text-center py-4">Genera un reporte para ver las fechas con más ventas</p>
                     </div>
                 </div>
 
-                <!-- Summary Cards -->
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white">
-                        <div class="text-center">
-                            <p class="text-sm opacity-90">Total Ventas</p>
-                            <p class="text-xl font-bold" id="total-sales-amount">Bs. 0.00</p>
-                        </div>
-                    </div>
-                    <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 text-white">
-                        <div class="text-center">
-                            <p class="text-sm opacity-90">Total Ganancia</p>
-                            <p class="text-xl font-bold" id="total-profit-amount">Bs. 0.00</p>
-                        </div>
-                    </div>
-                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 text-white">
-                        <div class="text-center">
-                            <p class="text-sm opacity-90">Total Items</p>
-                            <p class="text-xl font-bold" id="total-items-count">0</p>
-                        </div>
-                    </div>
-                    <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-4 text-white">
-                        <div class="text-center">
-                            <p class="text-sm opacity-90">Promedio Venta</p>
-                            <p class="text-xl font-bold" id="average-sale-amount">Bs. 0.00</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sales Detail -->
+                <!-- Daily Sales Pattern -->
                 <div class="bg-white card-mobile p-4">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Detalle de Ventas</h3>
-                    <div id="sales-detail" class="space-y-2">
-                        <p class="text-gray-500 text-center py-4">No hay ventas para mostrar</p>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Patrón de Ventas Diarias</h3>
+                    <div class="mb-4">
+                        <canvas id="dailyPatternChart" width="400" height="200"></canvas>
+                    </div>
+                    <div id="daily-pattern-list" class="space-y-2">
+                        <p class="text-gray-500 text-center py-4">Genera un reporte para ver el patrón de ventas</p>
                     </div>
                 </div>
+
             </div>
         </section>
 
