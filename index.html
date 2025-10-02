@@ -318,8 +318,12 @@
                 <h1 class="text-xl font-bold text-gray-800 flex-1 text-center">HEHA</h1>
                 <div class="flex items-center gap-3">
                     <!-- Update button -->
-                    <button id="update-app-btn" class="text-blue-600 hover:text-blue-700 transition-colors duration-200" title="Actualizar aplicación" onclick="forceUpdate()">
+                    <button id="update-app-btn" class="text-blue-600 hover:text-blue-700 transition-colors duration-200 relative" title="Actualizar aplicación" onclick="forceUpdate()">
                         <i class="fas fa-sync-alt text-lg"></i>
+                        <!-- Badge de actualización -->
+                        <span id="update-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center hidden animate-pulse">
+                            !
+                        </span>
                     </button>
                     <!-- Real-time sync indicator -->
                     <div id="realtime-indicator" class="flex items-center text-green-500 cursor-pointer hover:text-green-600 transition-colors" title="Sincronización en tiempo real activa - Haz clic para ver detalles">
@@ -1299,26 +1303,46 @@
     </div>
 
     <!-- App Script -->
-    <script src="app.js"></script>
+    <script src="app.js?v=1.0.3"></script>
     
     <!-- PWA Installation and Service Worker -->
     <script>
         // Registrar Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('/sw.js?v=' + Date.now())
                     .then((registration) => {
                         console.log('Service Worker registrado exitosamente:', registration.scope);
+                        
+                        // Verificar actualizaciones inmediatamente
+                        registration.update();
+                        
+                        // Forzar actualización inmediata si hay una versión esperando
+                        if (registration.waiting) {
+                            console.log('Versión esperando detectada, activando inmediatamente...');
+                            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                            setTimeout(() => {
+                                window.location.reload(true);
+                            }, 1000);
+                        }
                         
                         // Verificar si hay actualizaciones
                         registration.addEventListener('updatefound', () => {
                             console.log('Nueva versión encontrada');
                             const newWorker = registration.installing;
                             newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // Hay una nueva versión disponible
-                                    console.log('Nueva versión instalada, mostrando botón');
-                                    showUpdateNotification();
+                                if (newWorker.state === 'installed') {
+                                    if (navigator.serviceWorker.controller) {
+                                        // Hay una nueva versión disponible
+                                        console.log('Nueva versión instalada, mostrando notificación...');
+                                        
+                                        // Solo mostrar notificación si realmente hay una nueva versión
+                                        showUpdateNotification();
+                                    } else {
+                                        // Primera instalación
+                                        console.log('Service Worker instalado por primera vez');
+                                        window.location.reload();
+                                    }
                                 }
                             });
                         });
@@ -1329,15 +1353,29 @@
                             showUpdateNotification();
                         }
                         
-                        // Verificar actualizaciones periódicamente
+                        // Verificar actualizaciones periódicamente (menos frecuente)
                         setInterval(() => {
                             console.log('Verificando actualizaciones...');
                             registration.update();
-                        }, 30000); // Cada 30 segundos
+                        }, 60000); // Cada 60 segundos (1 minuto)
                         
                         // Verificar actualizaciones al enfocar la ventana
                         window.addEventListener('focus', () => {
                             console.log('Ventana enfocada, verificando actualizaciones...');
+                            registration.update();
+                        });
+                        
+                        // Verificar actualizaciones cuando la app vuelve a estar activa
+                        document.addEventListener('visibilitychange', () => {
+                            if (!document.hidden) {
+                                console.log('App visible, verificando actualizaciones...');
+                                registration.update();
+                            }
+                        });
+                        
+                        // Verificar actualizaciones cuando se recupera la conexión
+                        window.addEventListener('online', () => {
+                            console.log('Conexión restaurada, verificando actualizaciones...');
                             registration.update();
                         });
                         
@@ -1430,40 +1468,93 @@
 
         // Función para mostrar notificación de actualización
         function showUpdateNotification() {
+            // Evitar mostrar múltiples notificaciones
+            if (document.getElementById('update-notification')) {
+                return;
+            }
+            
+            // Verificar si realmente hay una actualización disponible
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then((registration) => {
+                    if (!registration || !registration.waiting) {
+                        console.log('No hay actualización disponible, no mostrando notificación');
+                        return;
+                    }
+                    
+                    // Solo mostrar notificación si hay una versión esperando
+                    showUpdateNotificationUI();
+                });
+            }
+        }
+        
+        // Función para mostrar la UI de notificación
+        function showUpdateNotificationUI() {
+            console.log('Mostrando notificación de actualización...');
+            
             // Mostrar botón en el header
             const updateBtn = document.getElementById('update-app-btn');
+            const updateBadge = document.getElementById('update-badge');
             if (updateBtn) {
                 updateBtn.classList.remove('hidden');
                 updateBtn.innerHTML = '<i class="fas fa-download text-lg"></i>';
                 updateBtn.title = 'Nueva versión disponible - Haz clic para actualizar';
                 updateBtn.onclick = updateApp;
                 
+                // Mostrar badge de actualización
+                if (updateBadge) {
+                    updateBadge.classList.remove('hidden');
+                }
+                
                 // Agregar animación de parpadeo
                 updateBtn.classList.add('animate-pulse');
             }
             
-            // Mostrar notificación flotante
+            // Mostrar notificación flotante más prominente
             const notification = document.createElement('div');
-            notification.className = 'fixed top-4 left-4 right-4 bg-blue-500 text-white p-4 rounded-lg shadow-lg z-50';
+            notification.id = 'update-notification';
+            notification.className = 'fixed top-4 left-4 right-4 bg-gradient-to-r from-green-500 to-blue-500 text-white p-4 rounded-lg shadow-xl z-50 border-2 border-white';
             notification.innerHTML = `
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
-                        <i class="fas fa-sync-alt mr-2"></i>
-                        <span class="font-semibold">Nueva versión disponible</span>
+                        <i class="fas fa-sync-alt mr-3 text-xl animate-spin"></i>
+                        <div>
+                            <div class="font-bold text-lg">¡Nueva versión disponible!</div>
+                            <div class="text-sm opacity-90">Tu aplicación se actualizará automáticamente</div>
+                        </div>
                     </div>
-                    <button onclick="updateApp()" class="bg-white text-blue-500 px-3 py-1 rounded text-sm font-semibold">
-                        Actualizar
-                    </button>
+                    <div class="flex gap-2">
+                        <button onclick="updateApp()" class="bg-white text-green-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-download mr-1"></i> Actualizar Ahora
+                        </button>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="bg-gray-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
             `;
             document.body.appendChild(notification);
             
-            // Auto-ocultar después de 10 segundos
+            // Hacer la notificación más persistente (30 segundos)
             setTimeout(() => {
                 if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
+                    notification.style.opacity = '0.7';
+                    notification.style.transform = 'scale(0.95)';
+                    notification.style.transition = 'all 0.3s ease';
                 }
-            }, 10000);
+            }, 20000);
+            
+            // Auto-ocultar después de 30 segundos
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateY(-100px)';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }
+            }, 30000);
         }
 
         // Función para verificar si hay una nueva versión disponible
@@ -1476,8 +1567,10 @@
                         
                         // Verificar si hay una versión esperando
                         if (registration.waiting) {
-                            console.log('Actualización esperando, mostrando botón');
+                            console.log('Actualización esperando, mostrando notificación');
                             showUpdateNotification();
+                        } else {
+                            console.log('No hay actualizaciones disponibles');
                         }
                     }
                 });
@@ -1523,89 +1616,193 @@
 
         // Función para actualizar la app
         function updateApp() {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistration().then((registration) => {
-                    if (registration && registration.waiting) {
-                        // Actualizar botón del header
-                        const updateBtn = document.getElementById('update-app-btn');
-                        if (updateBtn) {
-                            updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-lg"></i>';
-                            updateBtn.title = 'Actualizando...';
-                            updateBtn.onclick = null; // Deshabilitar clics adicionales
-                        }
-                        
-                        // Enviar mensaje al service worker para que se active
-                        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-                        
-                        // Mostrar mensaje de actualización
-                        const notification = document.createElement('div');
-                        notification.className = 'fixed top-4 left-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50';
-                        notification.innerHTML = `
-                            <div class="flex items-center justify-center">
-                                <i class="fas fa-spinner fa-spin mr-2"></i>
-                                <span class="font-semibold">Actualizando aplicación...</span>
-                            </div>
-                        `;
-                        document.body.appendChild(notification);
-                        
-                        // Recargar la página después de un breve delay
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    }
-                });
-            }
-        }
-
-        // Función para forzar actualización (siempre disponible)
-        function forceUpdate() {
-            const updateBtn = document.getElementById('update-app-btn');
-            if (updateBtn) {
-                updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-lg"></i>';
-                updateBtn.title = 'Actualizando...';
-                updateBtn.onclick = null; // Deshabilitar clics adicionales
+            console.log('Iniciando actualización de la aplicación...');
+            
+            // Ocultar notificación de actualización si existe
+            const updateNotification = document.getElementById('update-notification');
+            if (updateNotification) {
+                updateNotification.remove();
             }
             
-            // Mostrar mensaje de actualización
+            // Mostrar mensaje de actualización más prominente
             const notification = document.createElement('div');
-            notification.className = 'fixed top-4 left-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50';
+            notification.id = 'updating-notification';
+            notification.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
             notification.innerHTML = `
-                <div class="flex items-center justify-center">
-                    <i class="fas fa-spinner fa-spin mr-2"></i>
-                    <span class="font-semibold">Actualizando aplicación...</span>
+                <div class="bg-white rounded-lg p-8 max-w-sm mx-4 text-center shadow-2xl">
+                    <div class="mb-4">
+                        <i class="fas fa-sync-alt fa-3x text-green-500 animate-spin"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Actualizando aplicación</h3>
+                    <p class="text-gray-600 mb-4">Limpiando datos del sitio y descargando nueva versión...</p>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-green-500 h-2 rounded-full animate-pulse" style="width: 100%"></div>
+                    </div>
                 </div>
             `;
             document.body.appendChild(notification);
             
-            // Limpiar caché y recargar
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistration().then((registration) => {
-                    if (registration) {
-                        // Forzar actualización del service worker
-                        registration.update();
-                        
-                        // Si hay una versión esperando, activarla
-                        if (registration.waiting) {
-                            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-                        }
-                    }
+            // Usar la función de limpieza agresiva
+            setTimeout(() => {
+                clearAllSiteData();
+            }, 1000);
+        }
+
+        // Función para forzar actualización (siempre disponible)
+        function forceUpdate() {
+            console.log('Forzando actualización manual...');
+            
+            // Mostrar mensaje de actualización
+            const notification = document.createElement('div');
+            notification.id = 'force-update-notification';
+            notification.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            notification.innerHTML = `
+                <div class="bg-white rounded-lg p-8 max-w-sm mx-4 text-center shadow-2xl">
+                    <div class="mb-4">
+                        <i class="fas fa-sync-alt fa-3x text-blue-500 animate-spin"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Forzando actualización</h3>
+                    <p class="text-gray-600 mb-4">Limpiando caché y descargando última versión...</p>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-500 h-2 rounded-full animate-pulse" style="width: 100%"></div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            // Limpiar todos los caches primero
+            if ('caches' in window) {
+                caches.keys().then((cacheNames) => {
+                    console.log('Limpiando caches:', cacheNames);
+                    return Promise.all(
+                        cacheNames.map((cacheName) => {
+                            console.log('Eliminando cache:', cacheName);
+                            return caches.delete(cacheName);
+                        })
+                    );
+                }).then(() => {
+                    console.log('Todos los caches eliminados');
                     
-                    // Recargar la página
-                    setTimeout(() => {
-                        window.location.reload(true); // true = forzar recarga desde servidor
-                    }, 1000);
+                    // Desregistrar service worker
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.getRegistrations().then((registrations) => {
+                            return Promise.all(
+                                registrations.map((registration) => {
+                                    console.log('Desregistrando service worker:', registration.scope);
+                                    return registration.unregister();
+                                })
+                            );
+                        }).then(() => {
+                            console.log('Service workers desregistrados');
+                            // Recargar con cache busting
+                            setTimeout(() => {
+                                window.location.href = window.location.href + '?v=' + Date.now();
+                            }, 1000);
+                        });
+                    } else {
+                        // Recargar directamente
+                        setTimeout(() => {
+                            window.location.href = window.location.href + '?v=' + Date.now();
+                        }, 1000);
+                    }
                 });
             } else {
-                // Si no hay service worker, solo recargar
+                // No hay caches, recargar directamente
                 setTimeout(() => {
-                    window.location.reload(true);
+                    window.location.href = window.location.href + '?v=' + Date.now();
                 }, 1000);
             }
         }
 
+        // Función para simular "Borrar datos del sitio" (más agresiva)
+        function clearAllSiteData() {
+            console.log('🧹 Simulando "Borrar datos del sitio"...');
+            
+            // 1. Desregistrar todos los service workers
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then((registrations) => {
+                    return Promise.all(
+                        registrations.map((registration) => {
+                            console.log('🗑️ Desregistrando service worker:', registration.scope);
+                            return registration.unregister();
+                        })
+                    );
+                }).then(() => {
+                    console.log('✅ Service workers desregistrados');
+                });
+            }
+            
+            // 2. Limpiar todos los caches
+            if ('caches' in window) {
+                caches.keys().then((cacheNames) => {
+                    return Promise.all(
+                        cacheNames.map((cacheName) => {
+                            console.log('🗑️ Eliminando cache:', cacheName);
+                            return caches.delete(cacheName);
+                        })
+                    );
+                }).then(() => {
+                    console.log('✅ Todos los caches eliminados');
+                });
+            }
+            
+            // 3. Limpiar localStorage
+            try {
+                localStorage.clear();
+                console.log('✅ localStorage limpiado');
+            } catch (e) {
+                console.log('⚠️ No se pudo limpiar localStorage:', e);
+            }
+            
+            // 4. Limpiar sessionStorage
+            try {
+                sessionStorage.clear();
+                console.log('✅ sessionStorage limpiado');
+            } catch (e) {
+                console.log('⚠️ No se pudo limpiar sessionStorage:', e);
+            }
+            
+            // 5. Limpiar IndexedDB
+            if ('indexedDB' in window) {
+                try {
+                    // Intentar eliminar bases de datos conocidas
+                    const dbNames = ['heha-db', 'firebase-db', 'app-db'];
+                    dbNames.forEach(dbName => {
+                        indexedDB.deleteDatabase(dbName);
+                    });
+                    console.log('✅ IndexedDB limpiado');
+                } catch (e) {
+                    console.log('⚠️ No se pudo limpiar IndexedDB:', e);
+                }
+            }
+            
+            // 6. Recargar con cache busting extremo
+            setTimeout(() => {
+                console.log('🔄 Recargando con cache busting extremo...');
+                const url = new URL(window.location.href);
+                url.searchParams.set('v', Date.now());
+                url.searchParams.set('clear', 'true');
+                window.location.href = url.toString();
+            }, 1000);
+        }
+
+        // Función para forzar actualización inmediata (se ejecuta automáticamente)
+        function forceImmediateUpdate() {
+            console.log('🔄 Forzando actualización inmediata...');
+            
+            // Usar la función más agresiva
+            clearAllSiteData();
+        }
+        
+        // Solo ejecutar actualización inmediata si hay una nueva versión disponible
+        // (Removido el setTimeout automático para evitar notificaciones falsas)
+
         // Función para verificar actualizaciones (disponible globalmente)
         window.checkForUpdates = checkForUpdates;
         window.forceUpdateCheck = forceUpdateCheck;
+        window.forceUpdate = forceUpdate;
+        window.forceImmediateUpdate = forceImmediateUpdate;
+        window.clearAllSiteData = clearAllSiteData;
 
         // Detectar si la app se está ejecutando como PWA
         function isPWA() {

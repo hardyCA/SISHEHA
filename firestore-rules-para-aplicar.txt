@@ -33,3 +33,4 @@ Estas reglas permiten acceso completo a la base de datos. Son apropiadas para us
 - Los errores de permisos deberían desaparecer
 - El sistema debería funcionar correctamente
 
+

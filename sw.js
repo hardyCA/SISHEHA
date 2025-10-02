@@ -1,5 +1,5 @@
 // Service Worker para HEHA PWA
-const CACHE_NAME = "heha-v1.0.1";
+const CACHE_NAME = "heha-v1.0.3";
 const urlsToCache = [
   "/",
   "/index.html",
@@ -12,9 +12,18 @@ const urlsToCache = [
   "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
 ];
 
+// Función para agregar cache busting a URLs
+function addCacheBusting(url) {
+  const separator = url.includes("?") ? "&" : "?";
+  return url + separator + "v=" + Date.now();
+}
+
 // Instalación del Service Worker
 self.addEventListener("install", (event) => {
-  console.log("Service Worker: Instalando...");
+  console.log("Service Worker: Instalando nueva versión...");
+  // Forzar que el nuevo service worker tome control inmediatamente
+  self.skipWaiting();
+
   event.waitUntil(
     caches
       .open(CACHE_NAME)
@@ -30,18 +39,27 @@ self.addEventListener("install", (event) => {
 
 // Activación del Service Worker
 self.addEventListener("activate", (event) => {
-  console.log("Service Worker: Activando...");
+  console.log("Service Worker: Activando nueva versión...");
+  // Tomar control inmediatamente de todas las pestañas
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log("Service Worker: Eliminando cache antiguo:", cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    Promise.all([
+      // Limpiar caches antiguos
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              console.log(
+                "Service Worker: Eliminando cache antiguo:",
+                cacheName
+              );
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // Tomar control de todas las pestañas
+      self.clients.claim(),
+    ])
   );
 });
 
@@ -76,36 +94,63 @@ self.addEventListener("fetch", (event) => {
         })
     );
   } else {
-    // Para recursos estáticos: Cache First
-    event.respondWith(
-      caches.match(event.request).then((response) => {
-        // Si está en cache, devolverlo
-        if (response) {
-          return response;
-        }
+    // Para recursos estáticos: Network First con cache busting para recursos críticos
+    const isCriticalResource =
+      event.request.url.includes("index.html") ||
+      event.request.url.includes("app.js") ||
+      event.request.url.includes("sw.js");
 
-        // Si no está en cache, hacer fetch y cachear
-        return fetch(event.request).then((response) => {
-          // Verificar si la respuesta es válida
-          if (
-            !response ||
-            response.status !== 200 ||
-            response.type !== "basic"
-          ) {
+    if (isCriticalResource) {
+      // Para recursos críticos: Network First con cache busting
+      event.respondWith(
+        fetch(addCacheBusting(event.request.url))
+          .then((response) => {
+            // Si la respuesta es exitosa, actualizar cache
+            if (response.status === 200) {
+              const responseClone = response.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(event.request, responseClone);
+              });
+            }
+            return response;
+          })
+          .catch(() => {
+            // Si falla la red, intentar desde cache
+            return caches.match(event.request);
+          })
+      );
+    } else {
+      // Para otros recursos estáticos: Cache First
+      event.respondWith(
+        caches.match(event.request).then((response) => {
+          // Si está en cache, devolverlo
+          if (response) {
             return response;
           }
 
-          // Clonar la respuesta
-          const responseToCache = response.clone();
+          // Si no está en cache, hacer fetch y cachear
+          return fetch(event.request).then((response) => {
+            // Verificar si la respuesta es válida
+            if (
+              !response ||
+              response.status !== 200 ||
+              response.type !== "basic"
+            ) {
+              return response;
+            }
 
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
+            // Clonar la respuesta
+            const responseToCache = response.clone();
+
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+
+            return response;
           });
-
-          return response;
-        });
-      })
-    );
+        })
+      );
+    }
   }
 });
 
@@ -113,6 +158,24 @@ self.addEventListener("fetch", (event) => {
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
+  }
+
+  if (event.data && event.data.type === "CHECK_UPDATE") {
+    // Verificar si hay una nueva versión disponible
+    self.registration.update().then(() => {
+      console.log("Service Worker: Verificación de actualización completada");
+    });
+  }
+});
+
+// Notificar a la aplicación cuando hay una nueva versión
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "GET_VERSION") {
+    event.ports[0].postMessage({
+      type: "VERSION_INFO",
+      version: CACHE_NAME,
+      timestamp: Date.now(),
+    });
   }
 });
 
