@@ -207,9 +207,34 @@
             transition: max-height 0.3s ease-in-out;
         }
         
+        /* Mejorar el scroll de ingredientes */
+        .ingredients-list-expanded .bg-gray-50 {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+        
+        .ingredients-list-expanded .bg-gray-50::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .ingredients-list-expanded .bg-gray-50::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .ingredients-list-expanded .bg-gray-50::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        .ingredients-list-expanded .bg-gray-50::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
         .ingredients-list-expanded {
-            max-height: 300px;
-            overflow: hidden;
+            max-height: 500px;
+            overflow-y: auto;
             transition: max-height 0.3s ease-in-out;
         }
         
@@ -711,9 +736,9 @@
     </nav>
 
     <!-- FAB for Quick Actions -->
-    <button class="fab bg-blue-500 text-white hover:bg-blue-600 transition-colors" id="quick-action-fab">
+    <!-- <button class="fab bg-blue-500 text-white hover:bg-blue-600 transition-colors" id="quick-action-fab">
         <i class="fas fa-plus text-xl"></i>
-    </button>
+    </button> -->
 
     <!-- Modals will be added here -->
     <!-- Ingredient Modal -->
@@ -785,9 +810,9 @@
                         
                         <div class="border-t border-gray-200 pt-3">
                             <div class="flex gap-2">
-                                <select id="dish-ingredient-select" class="flex-1 input-mobile border border-gray-300 px-3 py-2 focus:border-purple-500 focus:outline-none text-sm">
+                                <!-- <select id="dish-ingredient-select" class="flex-1 input-mobile border border-gray-300 px-3 py-2 focus:border-purple-500 focus:outline-none text-sm">
                                     <option value="">Seleccionar ingrediente</option>
-                                </select>
+                                </select> -->
                                 <button type="button" id="add-ingredient-to-dish" class="btn-mobile bg-purple-500 text-white hover:bg-purple-600 transition-colors px-4 py-2 text-sm">
                                     <i class="fas fa-plus mr-1"></i>Agregar
                                 </button>

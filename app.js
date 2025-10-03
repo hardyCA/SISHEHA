@@ -980,17 +980,24 @@ class RestaurantManager {
                         <div id="ingredients-list-${
                           dish.id
                         }" class="ingredients-list-collapsed">
-                            <ul class="list-disc list-inside space-y-1 mt-2">
+                            <div class="bg-gray-50 rounded-lg p-3 mt-2">
+                                <ul class="space-y-2">
                         ${(dish.ingredients || [])
                           .map(
                             (ing) => `
-                            <li>${ing.name}: ${
-                              ing.portions || ing.quantity || 0
-                            } porciones</li>
+                            <li class="flex justify-between items-center py-1 px-2 bg-white rounded-md shadow-sm">
+                                <span class="text-gray-700 font-medium">${
+                                  ing.name
+                                }</span>
+                                <span class="text-purple-600 font-semibold text-sm">${
+                                  ing.portions || ing.quantity || 0
+                                } porciones</span>
+                            </li>
                         `
                           )
                           .join("")}
-                    </ul>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
