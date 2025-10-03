@@ -1585,19 +1585,31 @@ class RestaurantManager {
         return false;
       }
 
-      // Convert sale date to local date string for comparison
-      const saleDateStr = saleDate.toISOString().split("T")[0];
-      const startDateStr = startDate.toISOString().split("T")[0];
-      const endDateStr = endDate.toISOString().split("T")[0];
-
       // For day period, use exact date match (more strict)
       if (period === "day") {
-        // Also check that the sale date is not in the future
-        const today = new Date();
-        const todayStr = today.toISOString().split("T")[0];
+        // Convert the selected date string to a proper date for comparison
+        const selectedDateStr = selectedDate; // This is already in YYYY-MM-DD format from the input
 
-        // Only show sales from the exact selected date, and not future dates
-        return saleDateStr === startDateStr && saleDateStr <= todayStr;
+        // Convert sale date to the same format
+        const saleYear = saleDate.getFullYear();
+        const saleMonth = String(saleDate.getMonth() + 1).padStart(2, "0");
+        const saleDay = String(saleDate.getDate()).padStart(2, "0");
+        const saleDateStr = `${saleYear}-${saleMonth}-${saleDay}`;
+
+        // Debug logging for each comparison
+        console.log(
+          `Comparing: Sale date "${saleDateStr}" vs Selected date "${selectedDateStr}" - Match: ${
+            saleDateStr === selectedDateStr
+          }`
+        );
+        console.log(
+          `Sale date details: Year=${saleYear}, Month=${saleMonth}, Day=${saleDay}`
+        );
+        console.log(`Selected date: ${selectedDateStr}`);
+        console.log(`Sale original: ${saleDate.toISOString()}`);
+
+        // Only show sales from the exact selected date
+        return saleDateStr === selectedDateStr;
       }
 
       // For other periods, use timestamp range
@@ -1617,6 +1629,16 @@ class RestaurantManager {
     console.log("End date:", endDate.toISOString());
     console.log("Start date string:", startDate.toISOString().split("T")[0]);
     console.log("End date string:", endDate.toISOString().split("T")[0]);
+
+    // Show local date format for day period
+    if (period === "day") {
+      const startYear = startDate.getFullYear();
+      const startMonth = String(startDate.getMonth() + 1).padStart(2, "0");
+      const startDay = String(startDate.getDate()).padStart(2, "0");
+      const startDateStr = `${startYear}-${startMonth}-${startDay}`;
+      console.log("Start date (local):", startDateStr);
+    }
+
     console.log("Filtered sales:", filteredSales);
 
     // Debug: Show all sales with their dates
@@ -1748,6 +1770,34 @@ class RestaurantManager {
     );
   }
 
+  // Simple function to show all sales with their dates
+  showAllSalesDates() {
+    console.log("=== ALL SALES WITH DATES ===");
+    this.sales.forEach((sale, index) => {
+      let saleDate;
+      if (sale.createdAt.toDate) {
+        saleDate = sale.createdAt.toDate();
+      } else if (sale.createdAt) {
+        saleDate = new Date(sale.createdAt);
+      }
+
+      if (saleDate) {
+        const saleYear = saleDate.getFullYear();
+        const saleMonth = String(saleDate.getMonth() + 1).padStart(2, "0");
+        const saleDay = String(saleDate.getDate()).padStart(2, "0");
+        const saleDateStr = `${saleYear}-${saleMonth}-${saleDay}`;
+
+        console.log(`Sale ${index}:`);
+        console.log(`  - Local date: ${saleDateStr}`);
+        console.log(`  - ISO string: ${saleDate.toISOString()}`);
+        console.log(`  - Original createdAt: ${sale.createdAt}`);
+        console.log(`  - Total: ${sale.total || "N/A"}`);
+        console.log("---");
+      }
+    });
+    console.log("=== END ALL SALES ===");
+  }
+
   // Debug function to test date filtering
   debugDateFiltering(selectedDate, period = "day") {
     console.log("=== DEBUG DATE FILTERING ===");
@@ -1808,16 +1858,23 @@ class RestaurantManager {
       }
 
       if (saleDate) {
-        const saleDateStr = saleDate.toISOString().split("T")[0];
-        const startDateStr = startDate.toISOString().split("T")[0];
-
         let shouldInclude = false;
+        let saleDateStr;
+
         if (period === "day") {
-          const today = new Date();
-          const todayStr = today.toISOString().split("T")[0];
-          shouldInclude =
-            saleDateStr === startDateStr && saleDateStr <= todayStr;
+          // Use local date format for day comparison
+          const saleYear = saleDate.getFullYear();
+          const saleMonth = String(saleDate.getMonth() + 1).padStart(2, "0");
+          const saleDay = String(saleDate.getDate()).padStart(2, "0");
+          saleDateStr = `${saleYear}-${saleMonth}-${saleDay}`;
+
+          // Use the selected date directly (already in YYYY-MM-DD format)
+          const selectedDateStr = selectedDate;
+
+          shouldInclude = saleDateStr === selectedDateStr;
         } else {
+          // Use ISO string for other periods
+          saleDateStr = saleDate.toISOString().split("T")[0];
           const saleTimestamp = saleDate.getTime();
           shouldInclude =
             saleTimestamp >= startDate.getTime() &&
@@ -1831,6 +1888,34 @@ class RestaurantManager {
     });
 
     console.log("=== END DEBUG ===");
+  }
+
+  // Test function for the specific problem
+  testDateProblem() {
+    console.log("=== TESTING DATE PROBLEM ===");
+    console.log("Testing day 3 (should show nothing if no sales on day 3)");
+    this.debugDateFiltering("2025-01-03", "day");
+
+    console.log("\nTesting day 2 (should show only day 2 sales)");
+    this.debugDateFiltering("2025-01-02", "day");
+
+    console.log("\nAll sales with their dates:");
+    this.showAllSalesDates();
+    console.log("=== END TEST ===");
+  }
+
+  // Test function for the specific date format mentioned (03/10/2025)
+  testSpecificDate() {
+    console.log("=== TESTING SPECIFIC DATE: 03/10/2025 ===");
+    console.log("This should show ONLY sales from October 3, 2025");
+    console.log("If it shows sales from October 2, 2025, there's a bug");
+
+    // Test with the exact date format
+    this.debugDateFiltering("2025-10-03", "day");
+
+    console.log("\nAll sales with their dates:");
+    this.showAllSalesDates();
+    console.log("=== END SPECIFIC TEST ===");
   }
 
   updatePeriodButtons() {
@@ -4043,4 +4128,7 @@ document.addEventListener("DOMContentLoaded", () => {
     restaurantManager.forceUpdateFinancialSummary();
   window.debugDateFiltering = (date, period) =>
     restaurantManager.debugDateFiltering(date, period);
+  window.showAllSalesDates = () => restaurantManager.showAllSalesDates();
+  window.testDateProblem = () => restaurantManager.testDateProblem();
+  window.testSpecificDate = () => restaurantManager.testSpecificDate();
 });
