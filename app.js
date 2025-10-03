@@ -1512,41 +1512,69 @@ class RestaurantManager {
   // Reports
   loadReports() {
     const today = new Date();
-    const lastWeek = new Date(today);
-    lastWeek.setDate(today.getDate() - 7);
 
-    document.getElementById("report-start-date").value = lastWeek
-      .toISOString()
-      .split("T")[0];
-    document.getElementById("report-end-date").value = today
+    // Set today's date as default
+    document.getElementById("report-date").value = today
       .toISOString()
       .split("T")[0];
 
-    // Set default period to week
-    this.currentPeriod = "week";
+    // Set default period to day
+    this.currentPeriod = "day";
     this.updatePeriodButtons();
-
-    this.generateReport();
   }
 
   generateReport() {
-    const startDate = document.getElementById("report-start-date").value;
-    const endDate = document.getElementById("report-end-date").value;
+    const selectedDate = document.getElementById("report-date").value;
+    const period = this.currentPeriod || "day";
 
-    if (!startDate || !endDate) {
-      this.showMessage("Selecciona fechas de inicio y fin", "error");
+    if (!selectedDate) {
+      this.showMessage("Selecciona una fecha", "error");
       return;
     }
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const baseDate = new Date(selectedDate);
+    let startDate, endDate;
 
-    // Set start time to beginning of day
-    start.setHours(0, 0, 0, 0);
-    // Set end time to end of day
-    end.setHours(23, 59, 59, 999);
+    // Calculate date range based on period
+    switch (period) {
+      case "day":
+        // Same day
+        startDate = new Date(baseDate);
+        endDate = new Date(baseDate);
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+        break;
+      case "week":
+        // Current week (Monday to Sunday)
+        startDate = new Date(baseDate);
+        const day = startDate.getDay();
+        const diff = startDate.getDate() - day + (day === 0 ? -6 : 1); // Monday
+        startDate.setDate(diff);
+        startDate.setHours(0, 0, 0, 0);
 
-    // Filter sales by date range
+        endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6); // Sunday
+        endDate.setHours(23, 59, 59, 999);
+        break;
+      case "month":
+        // Current month
+        startDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+        startDate.setHours(0, 0, 0, 0);
+
+        endDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
+        endDate.setHours(23, 59, 59, 999);
+        break;
+      case "year":
+        // Current year
+        startDate = new Date(baseDate.getFullYear(), 0, 1);
+        startDate.setHours(0, 0, 0, 0);
+
+        endDate = new Date(baseDate.getFullYear(), 11, 31);
+        endDate.setHours(23, 59, 59, 999);
+        break;
+    }
+
+    // Filter sales by date range using timestamps
     const filteredSales = this.sales.filter((sale) => {
       let saleDate;
       if (sale.createdAt.toDate) {
@@ -1557,25 +1585,62 @@ class RestaurantManager {
         return false;
       }
 
-      // Convert to local date string for comparison
+      // Convert sale date to local date string for comparison
       const saleDateStr = saleDate.toISOString().split("T")[0];
-      const startDateStr = start.toISOString().split("T")[0];
-      const endDateStr = end.toISOString().split("T")[0];
+      const startDateStr = startDate.toISOString().split("T")[0];
+      const endDateStr = endDate.toISOString().split("T")[0];
 
-      return saleDateStr >= startDateStr && saleDateStr <= endDateStr;
+      // For day period, use exact date match (more strict)
+      if (period === "day") {
+        // Also check that the sale date is not in the future
+        const today = new Date();
+        const todayStr = today.toISOString().split("T")[0];
+
+        // Only show sales from the exact selected date, and not future dates
+        return saleDateStr === startDateStr && saleDateStr <= todayStr;
+      }
+
+      // For other periods, use timestamp range
+      const saleTimestamp = saleDate.getTime();
+      return (
+        saleTimestamp >= startDate.getTime() &&
+        saleTimestamp <= endDate.getTime()
+      );
     });
 
     console.log(
-      `Generating report for ${filteredSales.length} sales from ${startDate} to ${endDate}`
+      `Generating report for ${filteredSales.length} sales for ${period} period`
     );
-    console.log("Date range:", start.toISOString(), "to", end.toISOString());
-    console.log("Start date string:", start.toISOString().split("T")[0]);
-    console.log("End date string:", end.toISOString().split("T")[0]);
+    console.log("Period:", period);
+    console.log("Selected date:", selectedDate);
+    console.log("Start date:", startDate.toISOString());
+    console.log("End date:", endDate.toISOString());
+    console.log("Start date string:", startDate.toISOString().split("T")[0]);
+    console.log("End date string:", endDate.toISOString().split("T")[0]);
     console.log("Filtered sales:", filteredSales);
+
+    // Debug: Show all sales with their dates
+    console.log("All sales with dates:");
+    this.sales.forEach((sale, index) => {
+      let saleDate;
+      if (sale.createdAt.toDate) {
+        saleDate = sale.createdAt.toDate();
+      } else if (sale.createdAt) {
+        saleDate = new Date(sale.createdAt);
+      }
+      if (saleDate) {
+        const saleDateStr = saleDate.toISOString().split("T")[0];
+        console.log(
+          `Sale ${index}: ${saleDateStr} (${saleDate.toISOString()})`
+        );
+      }
+    });
+
+    // Calculate totals for the selected period
+    this.calculateDateSummary(filteredSales, period);
 
     // Show message if no sales found
     if (filteredSales.length === 0) {
-      const period = this.currentPeriod || "período";
       const periodText =
         {
           day: "día",
@@ -1584,6 +1649,10 @@ class RestaurantManager {
           year: "año",
         }[period] || "período";
 
+      this.showMessage(
+        `No se encontraron ventas para el ${periodText} seleccionado`,
+        "info"
+      );
       console.log(
         `No se encontraron ventas para el ${periodText} seleccionado`
       );
@@ -1600,6 +1669,168 @@ class RestaurantManager {
     this.createDayOfWeekChart(filteredSales);
     this.createSalesByDateChart(filteredSales);
     this.createDailyPatternChart(filteredSales);
+  }
+
+  calculateDateSummary(sales, period = "day") {
+    let total = 0;
+    let capital = 0;
+    let profit = 0;
+
+    sales.forEach((sale) => {
+      // Calculate total from sale
+      if (sale.total) {
+        total += parseFloat(sale.total) || 0;
+      } else if (sale.items && sale.items.length > 0) {
+        // Calculate total from items
+        sale.items.forEach((item) => {
+          const itemTotal =
+            (parseFloat(item.price) || 0) * (parseFloat(item.quantity) || 0);
+          total += itemTotal;
+        });
+      }
+
+      // Calculate capital and profit from items
+      if (sale.items && sale.items.length > 0) {
+        sale.items.forEach((item) => {
+          const itemPrice = parseFloat(item.price) || 0;
+          const itemQuantity = parseFloat(item.quantity) || 0;
+          const itemCost = parseFloat(item.cost) || 0;
+
+          const itemTotal = itemPrice * itemQuantity;
+          const itemCapital = itemCost * itemQuantity;
+          const itemProfit = itemTotal - itemCapital;
+
+          capital += itemCapital;
+          profit += itemProfit;
+        });
+      }
+    });
+
+    // Update the UI
+    const dateSummaryEl = document.getElementById("date-summary");
+    const dateTotalEl = document.getElementById("date-total");
+    const dateCapitalEl = document.getElementById("date-capital");
+    const dateProfitEl = document.getElementById("date-profit");
+
+    // Update title based on period
+    const periodText =
+      {
+        day: "Resumen del Día",
+        week: "Resumen de la Semana",
+        month: "Resumen del Mes",
+        year: "Resumen del Año",
+      }[period] || "Resumen del Período";
+
+    if (dateSummaryEl) {
+      const titleEl = dateSummaryEl.querySelector("h3");
+      if (titleEl) {
+        titleEl.textContent = periodText;
+      }
+    }
+
+    if (dateTotalEl) {
+      dateTotalEl.textContent = `Bs. ${total.toFixed(2)}`;
+    }
+    if (dateCapitalEl) {
+      dateCapitalEl.textContent = `Bs. ${capital.toFixed(2)}`;
+    }
+    if (dateProfitEl) {
+      dateProfitEl.textContent = `Bs. ${profit.toFixed(2)}`;
+    }
+    if (dateSummaryEl) {
+      dateSummaryEl.classList.remove("hidden");
+    }
+
+    console.log(
+      `${periodText} - Total: Bs. ${total.toFixed(
+        2
+      )}, Capital: Bs. ${capital.toFixed(2)}, Profit: Bs. ${profit.toFixed(2)}`
+    );
+  }
+
+  // Debug function to test date filtering
+  debugDateFiltering(selectedDate, period = "day") {
+    console.log("=== DEBUG DATE FILTERING ===");
+    console.log("Selected date:", selectedDate);
+    console.log("Period:", period);
+
+    const baseDate = new Date(selectedDate);
+    let startDate, endDate;
+
+    // Calculate date range based on period
+    switch (period) {
+      case "day":
+        startDate = new Date(baseDate);
+        endDate = new Date(baseDate);
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+        break;
+      case "week":
+        startDate = new Date(baseDate);
+        const day = startDate.getDay();
+        const diff = startDate.getDate() - day + (day === 0 ? -6 : 1);
+        startDate.setDate(diff);
+        startDate.setHours(0, 0, 0, 0);
+
+        endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6);
+        endDate.setHours(23, 59, 59, 999);
+        break;
+      case "month":
+        startDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+        startDate.setHours(0, 0, 0, 0);
+
+        endDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
+        endDate.setHours(23, 59, 59, 999);
+        break;
+      case "year":
+        startDate = new Date(baseDate.getFullYear(), 0, 1);
+        startDate.setHours(0, 0, 0, 0);
+
+        endDate = new Date(baseDate.getFullYear(), 11, 31);
+        endDate.setHours(23, 59, 59, 999);
+        break;
+    }
+
+    console.log("Start date:", startDate.toISOString());
+    console.log("End date:", endDate.toISOString());
+    console.log("Start date string:", startDate.toISOString().split("T")[0]);
+    console.log("End date string:", endDate.toISOString().split("T")[0]);
+
+    // Show all sales and their filtering results
+    console.log("=== ALL SALES ===");
+    this.sales.forEach((sale, index) => {
+      let saleDate;
+      if (sale.createdAt.toDate) {
+        saleDate = sale.createdAt.toDate();
+      } else if (sale.createdAt) {
+        saleDate = new Date(sale.createdAt);
+      }
+
+      if (saleDate) {
+        const saleDateStr = saleDate.toISOString().split("T")[0];
+        const startDateStr = startDate.toISOString().split("T")[0];
+
+        let shouldInclude = false;
+        if (period === "day") {
+          const today = new Date();
+          const todayStr = today.toISOString().split("T")[0];
+          shouldInclude =
+            saleDateStr === startDateStr && saleDateStr <= todayStr;
+        } else {
+          const saleTimestamp = saleDate.getTime();
+          shouldInclude =
+            saleTimestamp >= startDate.getTime() &&
+            saleTimestamp <= endDate.getTime();
+        }
+
+        console.log(
+          `Sale ${index}: ${saleDateStr} (${saleDate.toISOString()}) - Include: ${shouldInclude}`
+        );
+      }
+    });
+
+    console.log("=== END DEBUG ===");
   }
 
   updatePeriodButtons() {
@@ -1620,31 +1851,24 @@ class RestaurantManager {
     this.updatePeriodButtons();
 
     const today = new Date();
-    const startDate = document.getElementById("report-start-date");
-    const endDate = document.getElementById("report-end-date");
+    const reportDate = document.getElementById("report-date");
 
     switch (period) {
       case "day":
-        startDate.value = today.toISOString().split("T")[0];
-        endDate.value = today.toISOString().split("T")[0];
+        // Set to today
+        reportDate.value = today.toISOString().split("T")[0];
         break;
       case "week":
-        const lastWeek = new Date(today);
-        lastWeek.setDate(today.getDate() - 7);
-        startDate.value = lastWeek.toISOString().split("T")[0];
-        endDate.value = today.toISOString().split("T")[0];
+        // Set to any day of current week (we'll use today)
+        reportDate.value = today.toISOString().split("T")[0];
         break;
       case "month":
-        const lastMonth = new Date(today);
-        lastMonth.setMonth(today.getMonth() - 1);
-        startDate.value = lastMonth.toISOString().split("T")[0];
-        endDate.value = today.toISOString().split("T")[0];
+        // Set to any day of current month (we'll use today)
+        reportDate.value = today.toISOString().split("T")[0];
         break;
       case "year":
-        const lastYear = new Date(today);
-        lastYear.setFullYear(today.getFullYear() - 1);
-        startDate.value = lastYear.toISOString().split("T")[0];
-        endDate.value = today.toISOString().split("T")[0];
+        // Set to any day of current year (we'll use today)
+        reportDate.value = today.toISOString().split("T")[0];
         break;
     }
 
@@ -3817,4 +4041,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Make debugging functions available globally
   window.forceUpdateFinancialSummary = () =>
     restaurantManager.forceUpdateFinancialSummary();
+  window.debugDateFiltering = (date, period) =>
+    restaurantManager.debugDateFiltering(date, period);
 });
