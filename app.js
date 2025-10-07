@@ -2179,7 +2179,7 @@ class RestaurantManager {
           day: "2-digit",
           month: "2-digit",
         });
-        dateCounts[dateStr] = { count: 0, date: dateKey };
+        dateCounts[dateStr] = { count: 0, orders: 0, date: dateKey };
       }
 
       // Count sales for each day
@@ -2197,6 +2197,9 @@ class RestaurantManager {
             day: "2-digit",
             month: "2-digit",
           });
+
+          // Contar pedidos (ventas)
+          dateCounts[dateStr].orders += 1;
 
           if (sale.items && sale.items.length > 0) {
             sale.items.forEach((item) => {
@@ -2222,8 +2225,11 @@ class RestaurantManager {
         });
 
         if (!dateCounts[dateStr]) {
-          dateCounts[dateStr] = { count: 0, date: dateKey };
+          dateCounts[dateStr] = { count: 0, orders: 0, date: dateKey };
         }
+
+        // Contar pedidos (ventas)
+        dateCounts[dateStr].orders += 1;
 
         if (sale.items && sale.items.length > 0) {
           sale.items.forEach((item) => {
@@ -2242,30 +2248,66 @@ class RestaurantManager {
       .slice(0, 31); // Show up to 31 days for month view
 
     this.salesByDateChart = new Chart(ctx, {
-      type: "line",
+      type: "bar",
       data: {
         labels: sortedDates.map(([dateStr]) => dateStr),
         datasets: [
           {
             label: "Platos Vendidos",
             data: sortedDates.map(([, data]) => data.count),
+            backgroundColor: "rgba(139, 92, 246, 0.8)",
             borderColor: "rgba(139, 92, 246, 1)",
-            backgroundColor: "rgba(139, 92, 246, 0.1)",
-            tension: 0.4,
-            fill: true,
+            borderWidth: 1,
+            borderRadius: 4,
+            borderSkipped: false,
+            yAxisID: "y",
+          },
+          {
+            label: "Pedidos Atendidos",
+            data: sortedDates.map(([, data]) => data.orders),
+            backgroundColor: "rgba(34, 197, 94, 0.8)",
+            borderColor: "rgba(34, 197, 94, 1)",
+            borderWidth: 1,
+            borderRadius: 4,
+            borderSkipped: false,
+            yAxisID: "y1",
           },
         ],
       },
       options: {
+        indexAxis: "y", // Esto hace que las barras sean horizontales
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: {
-            display: false,
+            display: true,
+            position: "top",
+            labels: {
+              usePointStyle: true,
+              padding: 20,
+            },
           },
         },
         scales: {
-          y: {
+          x: {
             beginAtZero: true,
+            grid: {
+              color: "rgba(0, 0, 0, 0.1)",
+            },
+            ticks: {
+              color: "rgba(0, 0, 0, 0.7)",
+            },
+          },
+          y: {
+            type: "category",
+            grid: {
+              display: false,
+            },
+            ticks: {
+              color: "rgba(0, 0, 0, 0.7)",
+              maxRotation: 0,
+              minRotation: 0,
+            },
           },
         },
       },
@@ -2520,7 +2562,7 @@ class RestaurantManager {
           month: "2-digit",
           year: "numeric",
         });
-        dateCounts[dateStr] = { count: 0, date: dateKey };
+        dateCounts[dateStr] = { count: 0, orders: 0, date: dateKey };
       }
 
       // Count sales for each day
@@ -2568,7 +2610,7 @@ class RestaurantManager {
         });
 
         if (!dateCounts[dateStr]) {
-          dateCounts[dateStr] = { count: 0, date: dateKey };
+          dateCounts[dateStr] = { count: 0, orders: 0, date: dateKey };
         }
 
         // Count total dishes sold, not just number of sales

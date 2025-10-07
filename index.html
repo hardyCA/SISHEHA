@@ -238,6 +238,44 @@
             transition: max-height 0.3s ease-in-out;
         }
         
+        /* Estilos para gráficos en layout horizontal */
+        .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+        
+        .chart-container canvas {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Estilo específico para gráfico de barras horizontales */
+        #salesByDateChart {
+            height: 300px !important;
+        }
+        
+        .chart-container:has(#salesByDateChart) {
+            height: 300px;
+        }
+        
+        /* Mejorar la responsividad de los gráficos */
+        @media (max-width: 768px) {
+            .grid.grid-cols-1.lg\\:grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 200px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .chart-container {
+                height: 280px;
+            }
+        }
+        
         /* Dashboard Views */
         .dashboard-view {
             transition: all 0.3s ease-in-out;
@@ -602,47 +640,50 @@
                     </div>
                 </div>
 
-                <!-- Top Selling Dishes -->
-                <div class="bg-white card-mobile p-4">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Platos Más Vendidos</h3>
-                    <div class="mb-4">
-                        <canvas id="topDishesChart" width="400" height="200"></canvas>
+                <!-- Charts Grid - Horizontal Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <!-- Top Selling Dishes -->
+                    <div class="bg-white card-mobile p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Platos Más Vendidos</h3>
+                        <div class="mb-4 chart-container">
+                            <canvas id="topDishesChart" width="400" height="250"></canvas>
+                        </div>
+                        <div id="top-dishes-list" class="space-y-2">
+                            <p class="text-gray-500 text-center py-4">Genera un reporte para ver los platos más vendidos</p>
+                        </div>
                     </div>
-                    <div id="top-dishes-list" class="space-y-2">
-                        <p class="text-gray-500 text-center py-4">Genera un reporte para ver los platos más vendidos</p>
-                    </div>
-                </div>
 
-                <!-- Sales by Day of Week -->
-                <div class="bg-white card-mobile p-4">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Ventas por Día de la Semana</h3>
-                    <div class="mb-4">
-                        <canvas id="dayOfWeekChart" width="400" height="200"></canvas>
+                    <!-- Sales by Day of Week -->
+                    <div class="bg-white card-mobile p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Ventas por Día de la Semana</h3>
+                        <div class="mb-4 chart-container">
+                            <canvas id="dayOfWeekChart" width="400" height="250"></canvas>
+                        </div>
+                        <div id="day-of-week-list" class="space-y-2">
+                            <p class="text-gray-500 text-center py-4">Genera un reporte para ver qué días se vende más</p>
+                        </div>
                     </div>
-                    <div id="day-of-week-list" class="space-y-2">
-                        <p class="text-gray-500 text-center py-4">Genera un reporte para ver qué días se vende más</p>
-                    </div>
-                </div>
 
-                <!-- Sales by Date -->
-                <div class="bg-white card-mobile p-4">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Ventas por Fecha</h3>
-                    <div class="mb-4">
-                        <canvas id="salesByDateChart" width="400" height="200"></canvas>
+                    <!-- Sales by Date -->
+                    <div class="bg-white card-mobile p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Ventas por Fecha</h3>
+                        <div class="mb-4 chart-container">
+                            <canvas id="salesByDateChart" width="400" height="250"></canvas>
+                        </div>
+                        <div id="sales-by-date-list" class="space-y-2">
+                            <p class="text-gray-500 text-center py-4">Genera un reporte para ver las fechas con más ventas</p>
+                        </div>
                     </div>
-                    <div id="sales-by-date-list" class="space-y-2">
-                        <p class="text-gray-500 text-center py-4">Genera un reporte para ver las fechas con más ventas</p>
-                    </div>
-                </div>
 
-                <!-- Daily Sales Pattern -->
-                <div class="bg-white card-mobile p-4">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Patrón de Ventas Diarias</h3>
-                    <div class="mb-4">
-                        <canvas id="dailyPatternChart" width="400" height="200"></canvas>
-                    </div>
-                    <div id="daily-pattern-list" class="space-y-2">
-                        <p class="text-gray-500 text-center py-4">Genera un reporte para ver el patrón de ventas</p>
+                    <!-- Daily Sales Pattern -->
+                    <div class="bg-white card-mobile p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Patrón de Ventas Diarias</h3>
+                        <div class="mb-4 chart-container">
+                            <canvas id="dailyPatternChart" width="400" height="250"></canvas>
+                        </div>
+                        <div id="daily-pattern-list" class="space-y-2">
+                            <p class="text-gray-500 text-center py-4">Genera un reporte para ver el patrón de ventas</p>
+                        </div>
                     </div>
                 </div>
 

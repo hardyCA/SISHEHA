@@ -34,3 +34,4 @@ Estas reglas permiten acceso completo a la base de datos. Son apropiadas para us
 - El sistema debería funcionar correctamente
 
 
+
